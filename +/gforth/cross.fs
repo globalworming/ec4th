@@ -70,7 +70,7 @@ H
 
 >CROSS
 
-\ Test against this definitions to find out whether we are cross-compiling
+\ Test against this definition to find out whether we are cross-compiling
 \ may be usefull for assemblers
 0 Constant gforth-cross-indicator
 
@@ -89,6 +89,10 @@ defined? emit-file defined? toupper and \ drop 0
 
 \ANSI : [IFUNDEF] defined? 0= postpone [IF] ; immediate
 \ANSI : [IFDEF] defined? postpone [IF] ; immediate
+
+\ANSI ." Detected ANSI system" cr
+\GFORTH ." Dectected Gforth stystem" cr
+
 0 \ANSI drop 1
 [IF]
 : \G postpone \ ; immediate
@@ -2121,56 +2125,41 @@ Variable to-doc  to-doc on
 
 \ Target TAGS creation
 
-s" kernel.TAGS" r/w create-file throw value tag-file-id
-s" kernel.tags" r/w create-file throw value vi-tag-file-id
+\ TODO: recent cross.fs has some improvements here 20260301;w
+
+s" tags" r/w create-file throw value ctags-file-id
 \ contains the file-id of the tags file
+
+: put-ctags-header ( -- ) 
+  ctags-file-id >r
+  s" !_TAG_FILE_FORMAT	2	/extended format/" r@ write-line throw
+  s" !_TAG_FILE_SORTED	0	/0=unsorted, 1=sorted/" r@ write-line throw
+  s" !_TAG_PROGRAM_NAME	Forth Generator	//" r@ write-line throw
+  s" !_TAG_PROGRAM_VERSION	1.0	//" r@ write-line throw
+  s" !_TAG_PROGRAM_URL	https://example.com/	//" r@ write-line throw
+  r> drop ;
+
+put-ctags-header
 
 Create tag-beg 1 c,  7F c,
 Create tag-end 1 c,  01 c,
 Create tag-bof 1 c,  0C c,
 Create tag-tab 1 c,  09 c,
+Create tag-dquot 1 c,  22 c,
 
-2variable last-loadfilename 0 0 last-loadfilename 2!
-	    
-: put-load-file-name ( -- )
-    sourcefilename last-loadfilename 2@ d<>
-    IF
-	tag-bof count tag-file-id write-line throw
-	sourcefilename 2dup
-	tag-file-id write-file throw
-	last-loadfilename 2!
-	s" ,0" tag-file-id write-line throw
-    THEN ;
-
-: cross-gnu-tag-entry  ( -- )
-    tlast @ 0<>	\ not an anonymous (i.e. noname) header
-    IF
-	put-load-file-name
-	source >in @ min tag-file-id write-file throw
-	tag-beg count tag-file-id write-file throw
-	Last-Header-Ghost @ >ghostname tag-file-id write-file throw
-	tag-end count tag-file-id write-file throw
-	base @ decimal sourceline# 0 <# #s #> tag-file-id write-file throw
-\	>in @ 0 <# #s [char] , hold #> tag-file-id write-line throw
-	s" ,0" tag-file-id write-line throw
-	base !
-    THEN ;
-
-: cross-vi-tag-entry ( -- )
-    tlast @ 0<>	\ not an anonymous (i.e. noname) header
-    IF
-	sourcefilename vi-tag-file-id write-file throw
-	tag-tab count vi-tag-file-id write-file throw
-	Last-Header-Ghost @ >ghostname vi-tag-file-id write-file throw
-	tag-tab count vi-tag-file-id write-file throw
-	s" /^" vi-tag-file-id write-file throw
-	source vi-tag-file-id write-file throw
-	s" $/" vi-tag-file-id write-line throw
-    THEN ;
+\ legacy cross supported VI tags and Gnu tags, removed
 
 : cross-tag-entry ( -- )
-    cross-gnu-tag-entry
-    cross-vi-tag-entry ;
+    tlast @ 0<>	\ not an anonymous (i.e. noname) header
+    IF
+	Last-Header-Ghost @ >ghostname ctags-file-id write-file throw
+	tag-tab count ctags-file-id write-file throw
+	sourcefilename ctags-file-id write-file throw
+	tag-tab count ctags-file-id write-file throw
+  sourceline# s>d <# #s #> ctags-file-id write-file throw
+	s" ;" ctags-file-id write-file throw
+	tag-dquot count ctags-file-id write-line throw
+    THEN ;
 
 \ Check for words
 
