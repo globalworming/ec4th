@@ -1,6 +1,8 @@
 \ +/eckernel/core/align.fs
 
-require +/eckernel/core-ext/control.fs
+\ require +/eckernel/core-ext/control.fs
+
+
 \ (?do)
 
 UNDEF-WORDS
