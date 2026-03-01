@@ -9,10 +9,8 @@ decimal
 
 \ : - ; \ wohl im target
 
-; \ multipliziere das
-; : * ( n1 n2 -- n3 ) \ core
-;	um* drop ;
-
+: * ( n1 n2 -- n3 ) \ core
+	um* drop ;
 
 : */ ( n1 n2 n3 -- n4 ) \ core
     */mod nip ;
