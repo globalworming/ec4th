@@ -1,0 +1,116 @@
++/ec4th/target/avr/prim.fs	;S	/^Code ;s$/
++/ec4th/target/avr/prim.fs	execute	/^Code execute$/
++/ec4th/target/avr/prim.fs	lit	/^code lit$/
++/ec4th/target/avr/prim.fs	branch	/^code branch$/
++/ec4th/target/avr/prim.fs	?branch	/^code ?branch$/
++/ec4th/target/avr/prim.fs	(loop)	/^code (loop)$/
++/ec4th/target/avr/prim.fs	unloop	/^code unloop$/
++/ec4th/target/avr/prim.fs	(do)	/^code (do)$/
++/ec4th/target/avr/prim.fs	here	/^Code here \ FIXME: Wird in High Forth gemacht$/
++/ec4th/target/avr/prim.fs	swap	/^Code swap ( S: n1 n2--n2 n1 R: -- )$/
++/ec4th/target/avr/prim.fs	drop	/^Code drop ( S: n-- ; R: -- )$/
++/ec4th/target/avr/prim.fs	2drop	/^Code 2drop ( S: n1 n2-- ; R: -- )$/
++/ec4th/target/avr/prim.fs	dup	/^Code dup ( S: n--n n ; R: -- )$/
++/ec4th/target/avr/prim.fs	over	/^Code over ( S: n1 n2--n1 n2 n1 ; R: -- )$/
++/ec4th/target/avr/prim.fs	-	/^Code - ( S: n1 n2--n3 ; R: -- )$/
++/ec4th/target/avr/prim.fs	+	/^Code + ( S: n1 n2--n3 ; R: -- )$/
++/ec4th/target/avr/prim.fs	2/	/^Code 2/ ( S: n1--n2 ; R: -- )$/
++/ec4th/target/avr/prim.fs	2*	/^Code 2* ( S: n1--n2 ; R: -- )$/
++/ec4th/target/avr/prim.fs	r>	/^Code r> ( S: --n ; R: n-- )$/
++/ec4th/target/avr/prim.fs	>r	/^Code >r ( S: n-- ; R: --n )$/
++/ec4th/target/avr/prim.fs	r@	/^Code r@ ( S: --n ; R: n--n )$/
++/ec4th/target/avr/prim.fs	rp@	/^Code rp@ ( S: --addr ; R: -- )$/
++/ec4th/target/avr/prim.fs	@	/^Code @ ( S: addr--n ; R: -- )$/
++/ec4th/target/avr/prim.fs	c@	/^Code c@ ( S: addr--c ; R: -- )$/
++/ec4th/target/avr/prim.fs	!	/^Code ! ( S: n addr-- ; R: -- )$/
++/ec4th/target/avr/prim.fs	c!	/^Code c! ( S: c addr-- ; R: -- )$/
++/ec4th/target/avr/prim.fs	,	/^Code , ( S: n-- ; R: -- )$/
++/ec4th/target/avr/prim.fs	c,	/^Code c, ( S: c-- ; R: -- )$/
++/ec4th/target/avr/prim.fs	cell+	/^Code cell+ ( S: n1--n2 ; R: -- )$/
++/ec4th/target/avr/prim.fs	sp@	/^Code sp@ ( S: --addr ; R: -- )$/
++/ec4th/target/avr/prim.fs	and	/^Code and ( S: n1 n2--n3 ; R: -- )$/
++/ec4th/target/avr/prim.fs	or	/^Code or ( S: n1 n2--n3 ; R: -- )$/
++/ec4th/target/avr/prim.fs	xor	/^Code xor ( S: n1 n2--n3 ; R -- )$/
++/ec4th/target/avr/prim.fs	um*	/^code um* ( n1 n2 - dn )$/
++/ec4th/target/avr/prim.fs	um/mod	/^code um/mod ( dn1 n2 -- remainder Quotient) $/
++/ec4th/target/avr/io/dot_s.fs	.controls	/^code .controls$/
++/ec4th/target/avr/io/dot_s.fs	.execute	/^code .execute$/
++/ec4th/target/avr/io/dot_s.fs	.	/^code .$/
++/ec4th/target/avr/io/dot_s.fs	u.	/^code u.$/
++/ec4th/target/avr/io/dot_s.fs	depth.controls	/^code depth.controls$/
++/ec4th/target/avr/io/dot_s.fs	depth	/^code depth$/
++/ec4th/target/avr/io/dot_s.fs	.s	/^code .s$/
++/ec4th/target/avr/io/emit_key.fs	(emit)	/^code (emit) ( S: n-- ; R: -- )$/
++/ec4th/target/avr/io/emit_key.fs	key?	/^code key? ( S: --f ; R: -- )$/
++/ec4th/target/avr/io/emit_key.fs	key	/^code key ( S: --char ; R: -- )$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core/constants.fs	bl	/^32 Constant bl$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core/constants.fs	cells	/^: cells ( n1 -- n2 ) \ core$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core/constants.fs	cell	/^1 cells Constant cell$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core/constants.fs	min-n	/^Constant min-n$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core/constants.fs	max-n	/^min-n invert Constant max-n$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core/constants.fs	bits/byte	/^8 Constant bits/byte$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core/constants.fs	maxtiblength	/^250 Constant maxtiblength$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core/constants.fs	f83headerstring	/^-1 Constant f83headerstring$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core/vars.fs	base	/^Variable base$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core/vars.fs	#tib	/^Variable #tib ( -- a-addr ) \ lenght of input$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core/vars.fs	>in	/^Variable >in ( -- a-addr ) \ offset counter from start of input$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core/vars.fs	tib	/^Create tib maxtiblength chars allot$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core/vars.fs	tibstack	/^Variable tibstack		\ saves >tib in execute$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core/vars.fs	>tib	/^Variable >tib		\ pointer to terminal input buffer$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core/vars.fs	dp	/^Variable dp$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core/vars.fs	tdp	/^Variable tdp$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core/vars.fs	hld	/^Variable hld$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core/vars.fs	itmp	/^variable itmp$/
++/eckernel/core/stack.fs	1+	/^: 1+ $/
++/eckernel/core/stack.fs	?dup	/^: ?dup ( w -- w )$/
++/eckernel/core/stack.fs	rot	/^: rot ( w1 w2 w3 -- w2 w3 w1 )$/
++/eckernel/core/stack.fs	-rot	/^: -rot ( w1 w2 w3 -- w3 w1 w2 )$/
++/eckernel/core/stack.fs	2dup	/^: 2dup ( w1 w2 -- w1 w2 w1 w2 )$/
++/eckernel/core/stack.fs	pick	/^: pick ( u -- w )$/
++/eckernel/core/stack.fs	2over	/^: 2over ( w1 w2 w3 w4 -- w1 w2 w3 w4 w1 w2 )$/
++/eckernel/core/stack.fs	2swap	/^: 2swap ( w1 w2 w3 w4 -- w3 w4 w1 w2 )$/
++/eckernel/core/stack.fs	2rot	/^: 2rot ( w1 w2 w3 w4 w5 w6 -- w3 w4 w5 w6 w1 w2 )$/
++/eckernel/core/stack.fs	(>r)	/^: (>r)$/
++/eckernel/core/stack.fs	2rdrop	/^: 2rdrop ( -- )$/
++/eckernel/core/stack.fs	i'	/^: i' ( -- w )$/
++/eckernel/core/stack.fs	I	/^: I ( -- n1 )$/
++/eckernel/core/stack.fs	j	/^: j ( -- n ) \ rp@ cell+ cell+ cell+ @ ;$/
++/eckernel/core/dictionary.fs	>body	/^: >body ( xt -- a_addr ) \ core$/
++/eckernel/core-ext/constants.fs	false	/^0 Constant false$/
++/eckernel/core-ext/constants.fs	true	/^-1 Constant true$/
++/eckernel/core-ext/constants.fs	CASE	/^0 CONSTANT case ( compilation  -- case-sys ; run-time  -- ) $/
++/eckernel/core/bitlogic.fs	0=	/^: 0= ( n -- f ) \ core$/
++/eckernel/core/bitlogic.fs	0<	/^: 0< ( n -- f ) \ core$/
++/eckernel/core/bitlogic.fs	=	/^: = ( n1 n2 -- f ) \ core$/
++/eckernel/core/bitlogic.fs	<	/^: < ( n1 n2 -- f ) \ core$/
++/eckernel/core/bitlogic.fs	>	/^: > ( n1 n2 -- f ) \ core$/
++/eckernel/core/bitlogic.fs	<=	/^: <=	( n1 n2 -- f )$/
++/eckernel/core/bitlogic.fs	u<	/^: u< ( u1 u2 -- f ) \ core$/
++/eckernel/core/bitlogic.fs	max	/^: max ( S: n1 n2--n ; R: -- ) \ core$/
++/eckernel/core/bitlogic.fs	min	/^: min ( S: n1 n2--n ; R: -- ) \ core$/
++/eckernel/core/bitlogic.fs	rshift	/^: rshift ( S: u1 n--u2 ; R: -- ) \ core $/
++/eckernel/core/bitlogic.fs	lshift	/^: lshift ( S: u1 n--u2 ; R: -- ) \ core$/
++/eckernel/core/bitlogic.fs	invert	/^: invert ( S: u1--u2 ; R: -- ) \ core$/
++/eckernel/core/bitlogic.fs	negate	/^: negate ( S: n1--n2 ; R: -- ) \ core$/
++/eckernel/core/bitlogic.fs	on	/^: on  ( a-addr -- ) \ gforth$/
++/eckernel/core/bitlogic.fs	off	/^: off ( a-addr -- ) \ gforth$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core-ext/constants.fs	false	/^0 Constant false$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core-ext/constants.fs	true	/^-1 Constant true$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core-ext/constants.fs	case	/^0 CONSTANT case ( compilation  -- case-sys ; run-time  -- ) $/
+/home/jeans/proj-svn/ec4th/+/eckernel/core-ext/comparison.fs	<>	/^: <> ( n1 n2 -- f )$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core-ext/comparison.fs	0<>	/^: 0<> ( n -- f )$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core-ext/comparison.fs	0>	/^: 0> ( n -- f )$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core-ext/comparison.fs	within	/^: within ( u1 u2 u3 -- f )$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core-ext/stack.fs	2>r	/^: 2>r ( w1 w2 -- )$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core-ext/stack.fs	2r>	/^: 2r> ( -- w1 w2 )$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core-ext/stack.fs	2r@	/^: 2r@ ( -- w1 w2 )$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core-ext/stack.fs	nip	/^: nip ( n1 n2 - n2 )$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core-ext/stack.fs	tuck	/^: tuck ( n1 n2 - n2 n1 n2 )$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core/strings.fs	/string	/^: /string ( c_addr1 u1 n -- c_addr2 u2 )$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core/strings.fs	upc	/^: upc ( c1 -- c2 )$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core/strings.fs	type	/^: type ( addr u -- ) \ core$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core/strings.fs	count	/^: count ( c_addr1 -- c_addr u ) \ core$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core-ext/control.fs	>resolve	/^: >resolve    ( addr -- )        $/
+/home/jeans/proj-svn/ec4th/+/eckernel/core-ext/control.fs	<resolve	/^: <resolve    ( addr -- )        $/
+/home/jeans/proj-svn/ec4th/+/eckernel/core-ext/control.fs	(?do)	/^: (?do)  ( nlimit nstart -- )$/
+/home/jeans/proj-svn/ec4th/+/eckernel/core-ext/control.fs	?do-like	/^: ?do-like ( -- do-sys )$/

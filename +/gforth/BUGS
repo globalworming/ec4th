@@ -1,0 +1,31 @@
+gforth.el: indentation does not work right on the first line of a
+buffer. anton 27jan95
+
+Conditional compilation continues after the file ends. This is allowed
+by the standard (through an ambiguous condition), but the compiler
+should at least produce a warning.  anton 27jan95
+
+QUERY and TIB may behave differently than some may expect. TIB always
+points to the current SOURCE, and QUERY puts its result there.  anton
+28nov96
+
+open-path-file expands "./" into the sourcefilename. It should either
+not expand "./" or provide a mechanism that allows the application to
+determine what "./" should expand to. anton 16jun98
+
+gforth.el: Typing <ret> does not work when tabs separate words in a
+line, and there is a \-comment at the end of the line.  anton 19feb00
+
+SEE does not work when the control structure is too complex (e.g.,
+load http://www.complang.tuwien.ac.at/forth/pentomino.fs and then do
+SEE NEXT-PIECE). anton 5mar2000
+
+Include cannot handle lines longer than 255 characters.  anton 4sep00
+
+Errors happening during a LOAD do not report the offending word and
+its context (e.g., the 64-byte line). anton 8sep00
+
+Our ecvt routine apparently does not work correctly for Infs and NaNs.
+Try "ac_cv_func_ecvt=no ./configure; make" and then in Gforth: "1e 0e
+f/ f. 0e 0e f/ f.". anton 25sep00
+

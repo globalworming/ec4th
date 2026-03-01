@@ -1,0 +1,190 @@
+You need gcc version 2.0 or later to compile gforth.
+
+First, type
+
+./configure
+
+(see Section Configuration Options below for details).
+
+After configuration, type
+
+make
+
+Now you can check whether your shiny new Forth system works. Say
+
+make check
+
+You can run some benchmarks with
+
+make bench
+
+and compare them with the results in Benchres and in the manual.
+
+If everything is all right, you may want to install gforth. Type
+
+make install
+
+You have to make an entry in the info directory file manually (see
+Installing Info Files, below).
+
+For paper documentation, print gforth.ps (a Postscript file (300dpi
+fonts, i.e., it works, but does not produce best quality on better
+printers)), or say
+
+make gforth.dvi
+
+and print the resulting file gforth.dvi. You can also get the
+documentation in HTML format by typing
+
+make html
+
+If you prefer plain ASCII documentation, you can 
+
+make doc/gforth.txt
+
+or just concatenate the files gforth.info-* ('cat gforth.info-*' under
+Unix); the result of the latter option is a little worse.
+
+You can find binary distributions, documentation in HTML and plain
+text format and information on known installation problems at
+http://www.complang.tuwien.ac.at/forth/gforth/.
+
+
+		Configuration Options
+
+If you use GNU make, you can build in a directory different from the
+source directory by changing to the build directory and invoking
+configure thus:
+
+$srcdir/configure
+
+where $srcdir is the source directory. (Note that we tested this only
+for installation; i.e., if you want to hack the Gforth sources, you
+should probably build in the source directory).
+
+configure has the following useful parameters:
+  --prefix=PREFIX         install architecture-independent files in PREFIX
+                          [default: /usr/local]
+  --exec-prefix=PREFIX    install architecture-dependent files in PREFIX
+                          [default: same as prefix]
+  --enable-force-reg      Use explicit register declarations if they appear in
+                          the machine.h file. This can cause a good speedup,
+                          but also incorrect code with some gcc versions on
+                          some processors (default disabled).
+  --enable-direct-threaded      Force direct threading. This may not work on
+                                some machines and may cause slowdown on others.
+                                (default processor-dependent)
+  --enable-indirect-threaded    Force indirect threading. This can cause a
+                                slowdown on some machines.
+                                (default processor-dependent)
+  --with-debug     specifies option -g to compile with debug info (default)
+  --without-debug  omits the -g switch and creates smaller images on
+                   machines where strip has problems with gcc style
+                   debugging informations.
+  --help: tells you about other parameters.
+
+The file Benchres shows which combination of the -enable options we
+tried gave the best results for various machines.
+
+If you don't like the defaults for the installation directories, you
+should override them already during configure.  E.g., if you want to
+install in the /gnu hierarchy instead of in the default /usr/local
+hierarchy, say
+
+./configure --prefix=/gnu
+
+Moreover, if your GCC is not called gcc (but, e.g., gcc-2.7.1), you
+should say so during configuration. E.g.:
+
+env CC=gcc-2.7.1 ./configure
+
+You can also pass additional options to gcc in this way, e.g., if you
+want to generate an a.out executable under Linux with gcc-2.7.0:
+
+env "CC=gcc -b i486-linuxaout -V 2.7.0" ./configure
+
+You can change the sizes of the various areas used in the default
+image `gforth.fi' by passing the appropriate Gforth command line
+options in the FORTHSIZES environment variable:
+
+env "FORTHSIZES=--dictionary-size=256k --data-stack-size=16k --fp-stack-size=15872b --return-stack-size=15k --locals-stack-size=14848b" ./configure
+
+The line above reaffirms the default sizes. Note that the locals
+stack area is also used as input buffer stack.
+
+If C's "long long" do not work properly on your machine (i.e., if the
+tests involving double-cell numbers fail), you can build Gforth such
+that it does not use "long long":
+
+env ac_cv_sizeof_long_long=0 ./configure
+
+
+			Cross-Configuration
+
+A few tests made by the configure script do not work in a
+cross-compilation situation. You have to provide the results of these
+tests by hand. E.g., if you compile for a 386 architecture processor:
+
+env ac_cv_sizeof_char_p=4 ac_cv_sizeof_short=2 ac_cv_sizeof_int=4 ac_cv_sizeof_long=4 ac_cv_sizeof_long_long=8 ac_cv_c_bigendian=no ./configure
+
+The ac_cv_sizeof_... variables give the sizes of various C types;
+ac_cv_sizeof_char_p is the same as "sizeof(char*)" in C code. The
+ac_cv_c_bigendian variable gives the byte order.
+
+
+		Preloading installation-specific code
+
+If you want to have some installation-specific files loaded when
+Gforth starts (e.g., an assembler for your processor), put commands
+for loading them into /usr/local/share/gforth/site-forth/siteinit.fs
+(if the commands work for all architectures) or
+/usr/local/lib/gforth/site-forth/siteinit.fs (for
+architecture-specific commands);
+/usr/local/lib/gforth/site-forth/siteinit.fs takes precedence if both
+files are present (unless you change the search path). The file names
+given above are the defaults; if you have changed the prefix, you have
+to replace "/usr/local" in these names with your prefix.
+
+By default, the installation procedure creates an empty
+/usr/local/share/gforth/site-forth/siteinit.fs if there is no such
+file.
+
+If you change the siteinit.fs file, you should run "make install"
+again for the changes to take effect (Actually, the part of "make
+install" starting with "rm gforth.fi" is sufficient).
+
+
+		Multiple Versions and Deinstallation
+
+Several versions of Gforth can be installed and used at the same
+time. Version `foo' can be invoked with `gforth-foo'. We recommend to
+keep the old version for some time after a new one has been installed.
+
+You can deinstall this version of Gforth with 'make uninstall' and
+version foo with 'make uninstall VERSION=foo'. 'make uninstall' also
+tells you how to uninstall Gforth completely.
+
+
+		Installing Info Files
+
+Info is the GNU project on-line documentation format. You can read
+info files either from within Emacs (Ctrl-h i) or using the
+stand-alone Info reader, 'info'.
+
+If you use the default install root of '/usr/local' then the info
+files will be installed in '/usr/local/info'.
+
+Many GNU/Linux distributions are set up to put all of their
+documentation in '/usr/info', in which case you might have to do a
+couple of things to get your environment set up to accommodate files
+in both areas:
+
+1. Add an INFOPATH environment variable. The easiest place to do
+this is '/etc/profile', right next to PATH and MANPATH:
+
+INFOPATH=/usr/local/info:/usr/info
+
+2. Create a file called 'dir' in 'usr/local/info'. Use the file
+'/usr/info/dir' as a template. You can add the line for gforth
+manually, or use '/sbin/install-info' (man install-info for details).
+
