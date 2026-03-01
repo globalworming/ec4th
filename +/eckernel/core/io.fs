@@ -1,6 +1,8 @@
 \ +/eckernel/core/io.fs
-require +/eckernel/core/strings.fs
-require +/eckernel/core/align.fs
+
+require strings.fs
+require align.fs
+
 UNDEF-WORDS
 decimal
 
@@ -24,8 +26,6 @@ decimal
 : "lit ( -- addr )
   r> r> dup count + aligned >r swap >r ;
 
-
-
 \ : (ud.) ( ud -- c-addr cnt )
 \   <# #s #> ;
 
@@ -34,7 +34,5 @@ decimal
 
 \ : u. ( u -- ) \ core
 \   0 ud. ;
-
-
 
 ALL-WORDS 

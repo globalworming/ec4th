@@ -12,5 +12,4 @@ decimal
 0 CONSTANT case ( compilation  -- case-sys ; run-time  -- ) 
     immediate
 
-
 ALL-WORDS

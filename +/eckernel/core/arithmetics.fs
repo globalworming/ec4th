@@ -85,6 +85,4 @@ decimal
       /modstep 
     LOOP drop swap 1 rshift or swap ;
 
-
-
 ALL-WORDS
