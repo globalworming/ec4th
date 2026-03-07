@@ -1054,7 +1054,10 @@ Variable reuse-ghosts reuse-ghosts off
 
 : g>xt ( ghost -- xt )
 \G Returns the xt (cfa) of a ghost. Issues a warning if undefined.
-  dup undefined? ABORT" CROSS: forward " >link @ ;
+  dup undefined? 
+  IF cr ." Undefined: " >ghostname type cr
+     true ABORT" CROSS: forward " 
+  THEN >link @ ;
    
 : g>body ( ghost -- body )
 \G Returns the body-address (pfa) of a ghost. 
@@ -2854,7 +2857,21 @@ by Create
   X here swap X a, tup@ - 
   r> activate ;
 
-T has? no-userspace H [IF]
+T has? userspace H [IF]
+
+Builder User
+Build: 0 u, X , ;Build
+by: :douser ( ghost -- up-addr )  X @ tup@ + ;DO
+
+Builder 2User
+Build: 0 u, X , 0 u, drop ;Build
+by User
+
+Builder AUser
+Build: 0 au, X , ;Build
+by User
+
+[ELSE]
 
 : buildby
   ghost >exec @ built >exec ! ;
@@ -2870,20 +2887,6 @@ by 2Variable
 Builder AUser
 buildby AVariable
 by AVariable
-
-[ELSE]
-
-Builder User
-Build: 0 u, X , ;Build
-by: :douser ( ghost -- up-addr )  X @ tup@ + ;DO
-
-Builder 2User
-Build: 0 u, X , 0 u, drop ;Build
-by User
-
-Builder AUser
-Build: 0 au, X , ;Build
-by User
 
 [THEN]
 
