@@ -6,10 +6,6 @@ DECIMAL
 \ - automatisch ramgröße herausfinden und stacks richtig initialisieren
 
 
-
-
-
-
 \ Label rjmp-over-initializiation-vector
 
 \ this long jump is later patched to jump to the initialization
@@ -18,8 +14,11 @@ Label jump-over		0 jmp,
 Label intro \ Initialization Block
 Label init-ip    	0 ,
 Label init-ramstart 	$f0 ,
-Label init-ramend	RAMEND lowbyte c, RAMEND highbyte c, \ Save RAMEND
-Label init-dataStack	dataStackStart lowbyte c, dataStackStart highbyte c,
+\ return stack grows downwards from ramend
+Label init-ramend $800 ,
+Label init-dataStack $800 $32 - ,
+init-datastack @ .
+." HELLO"
 Label init-uart		0 ,
 Label return		ret,
 return init-uart !
@@ -55,7 +54,8 @@ here jump-over cell+ !
 	ramstart lpmz,
 
 \ include of blink program at start
-	include blink.fs
+\	include blink.fs
+
 
 Label do_next
 	\ jumps to IP + 2 (next word to execute)
@@ -75,11 +75,13 @@ Label do_next
 	2 $ brcs,
 	temp0 lpmZ+, temp1 lpmZ+,
 	ZL temp0 movw,
+	\ TODO ijmp is word addressed instructions are always 16 bit, translate in compiler
 	ZH lsr, ZL ror,
 	ijmp,
 2 $:
 	temp0 ldZ+, temp1 ldZ+,
 	ZL temp0 movw,
+	\ TODO ijmp is word addressed instructions are always 16 bit, translate in compiler
 	ZH lsr, ZL ror,
 	ijmp,
 end-label+
@@ -218,9 +220,9 @@ end-code+
 \ ##############################Stack manipulation##############################
 \ ##############################################################################
 
-Code here \ FIXME: Wird in High Forth gemacht
-	do_next rjmp,
-End-Code+
+\ Code here \ FIXME: Wird in High Forth gemacht
+\ 	do_next rjmp,
+\ End-Code+
 
 Code swap ( S: n1 n2--n2 n1 R: -- )
 	\ swap the last two stack items
@@ -329,8 +331,7 @@ Code @ ( S: addr--n ; R: -- )
 	\ check if it is not a RAM addr
 	temp1 ramstart mov,
 	temp1 tosh cpc,
-	\ FIXME local labels
-  \ here 8 + brcs,
+  \ Without local labels: here 8 + brcs,
   0 $ brcs,
 	tosl lpmZ+, tosh lpmZ+,
 	do_next rjmp,
@@ -345,8 +346,6 @@ Code c@ ( S: addr--c ; R: -- )
 	\ check if it is not a RAM addr
 	temp1 ramstart mov,
 	temp1 tosh cpc, tosh clr,
-		\ FIXME local labels
-	\ here 4 + brcs,
 	0 $ brcs,
 	tosl lpmZ+,
 	do_next rjmp,
@@ -394,7 +393,7 @@ End-Code+
 
 Code cell+ ( S: n1--n2 ; R: -- )
 	\ adds the size of one cell to n1
-	tosl CELLSIZE adiw,
+	tosl 2 adiw,
 	do_next rjmp,
 End-Code+
 
@@ -434,92 +433,15 @@ Code xor ( S: n1 n2--n3 ; R -- )
 	do_next rjmp,
 End-Code+
 
+\ put the CPU to sleep forever, this will exit the simavr simulator 20260307;jw
+Code bye ( -- ) 
+	cli,
+	sleep,
+End-Code+
+
 \ include io/dot_s.fs
 \ include io/emit_key.fs
 
-\ ################ Wormis kram
-
-code um* ( n1 n2 - dn )
-	temp0 ldy+, temp1 ldy+,
-	temp2 clr, temp3 clr,
-	temp4 clr, temp5 clr,
-	temp7 clr, temp6 15 ldi,
-	4 $ rjmp,
-
-	3 $:
-	tosl lsl, tosh rol,
-
-	4 $:
-	temp6 temp7 CP,
-	1 $ BRCS,
-	temp2 lsl, temp3 rol,
-	temp4 rol, temp5 rol,
-	temp7 INC,
-	tosh 7 BST,
-	3 $ BRTC,
-	CLC,
-	temp2 temp0 add,
-	temp3 temp1 adc,
-	temp4 zerol adc,
-	temp5 zeroh adc,
-	3 $ rjmp,
-
-	1 $:
-	temp5 st-y, temp4 st-y,
-
-	\  zeroh st-y, temp7 st-y,
-	loadtos
-	temp3 st-y, temp2 st-y,
-	do_next rjmp,
-	end-code+
-
-
-code um/mod ( dn1 n2 -- remainder Quotient) 
-	temp6 ldy+, temp7 ldy+, \ highcell of dn1
-	temp4 ldy+, temp5 ldy+, \ lowcell of dn1
-	temp0 17 ldi, \ loopcounter
-	temp1 clr, \ carry
-
-\	temp7 tosh cp,		for testing if  n2 < high dn1, this would result in double quotient 
-\	temp6 tosl cpc,
-\	1 $ BRSH,
-\	temp2 tosl mov,		for testing if n2 != 0
-\	temp2 tosh or, 
-\	1 $ BREQ,
-
-
-	0 $:
-	temp0 1 SUBI,
-	1 $ BRCS,
-	zerol temp1 cp,
-	2 $ BRNE,
-	tosh temp7 cp,
-	2 $ BRLO,
-	tosh temp7 cp,
-	4 $ BREQ,
-	clc,
-	3 $ rjmp,
-	4 $:
-	temp6 tosl cp,
-	2 $ BRSH,
-	clc,
-	3 $ rjmp,
-	2 $:
-	temp6 tosl sub,
-	temp7 tosh sbc,
-	sec,
-	3 $:
-	temp4 rol, temp5 rol,
-	temp6 rol, temp7 rol,
-	temp1 clr, temp1 rol,
-	0 $ rjmp,
-	1 $:
-	temp7 lsr, temp6 ror,
-	temp6 temp1 or,
-	temp7 st-y, temp6 st-y,
-	tosl temp4 movw,
-	do_next rjmp,
-end-code+
-
+here init-dataStack @ $f000 + , Constant sp0
 
 HEX

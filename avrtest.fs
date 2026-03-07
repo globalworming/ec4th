@@ -11,10 +11,10 @@ setup-target
 
 lock
 
-include +/ec4th/target/avr/forth-conf.fs
+
 include +/ec4th/target/avr/prim.fs
 include +/ec4th/target/avr/io/uart.fs
-include +/ec4th/target/avr/io/dot_s.fs
+\ include +/ec4th/target/avr/io/dot_s.fs
 include +/ec4th/target/avr/io/emit_key.fs
 
 
@@ -29,10 +29,12 @@ include +/eckernel/primitives/arith.fs
 include +/eckernel/primitives/comparisons.fs
 include +/eckernel/primitives/double.fs
 
-
+include +/eckernel/nio/dothex.fs
 
 \ da muss jens ran:
 \ include +/eckernel/todo/int.fs
+
+\ include +/gforth/kernel/int.fs
 \ include +/gforth/kernel/comp.fs
 
 \ Codes for testing the Forth-System
@@ -44,9 +46,6 @@ include +/eckernel/primitives/double.fs
 \ include Forth-System Initiliziation Helping files
 \ include +/gforth/ec/mirror.fs
 
-
-
-
 \ ##############################################################################
 \ #############################Code#############################################
 \ ##############################################################################
@@ -56,7 +55,8 @@ Decimal
 >auto
 
 \ TODO: add mirrorram
- : xy 4711 . 1 2 3 .s cr ." hello world" cr ;
+\ .sx is not working
+ : xy 4711 .x sp0 .x sp@ .x ( 1 2 3 .sx )  depth .x cr ." hello world" cr bye ;
 
 \ vektor belegen
  ' xy >body init-ip !

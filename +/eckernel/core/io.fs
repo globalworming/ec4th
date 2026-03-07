@@ -11,8 +11,8 @@ decimal
 : CR \ CORE
     10 32 emit emit ;
 
-: ?  ( addr -- )
-  @ . ;
+\ : ?  ( addr -- )
+\   @ . ;
 
 : space ( -- ) \ core
     bl emit ;

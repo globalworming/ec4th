@@ -16,3 +16,5 @@ true SetValue ec
 true SetValue rom
 true SetValue ITC
 false SetValue compiler
+\ this is also indicated by sp0 defined in prims
+true SetValue no-userspace

@@ -209,6 +209,9 @@ has? floating [IF]
 aua!!
 [THEN]
 
+\ needed for Defer
+: noop ;
+
 Defer 'catch
  Defer 'throw
 

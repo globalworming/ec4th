@@ -1,3 +1,5 @@
+\ TODO: remove, we should not implement that in assembler ;jw
+
 code .controls
 \ Vorzeichen ausgeben, falls negativ
 	label .-

@@ -65,10 +65,14 @@ avariable holdend holdbuf-end holdend a!
 
 \ initialized by COLD
 
-Create main-task  has? OS [IF] 100 [ELSE] 40 [THEN] cells allot
+has? userspace [IF]
+
+\ TODO: have config setting for user area size
+Create main-task 40 ells allot
 
 \ set user-pointer from cross-compiler right
 main-task 
+\ TODO: update region pointer
 UNLOCK tup ! LOCK
 
 Variable udp ( -- a-addr ) \ gforth
@@ -77,6 +81,9 @@ Variable udp ( -- a-addr ) \ gforth
 AUser next-task        main-task next-task !
 AUser prev-task        main-task prev-task !
 AUser save-task        0 save-task !
+
+[THEN]
+
 AUser sp0 ( -- a-addr ) \ gforth
 \G @code{User} variable -- initial value of the data stack pointer.
 \ sp0 is used by douser:, must be user

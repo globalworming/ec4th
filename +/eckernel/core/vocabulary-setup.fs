@@ -1,5 +1,7 @@
 \ +/eckernel/core/vocabulary-setup.fs
 
+\ FIXME: remove
+
 UNDEF-WORDS
 decimal
 

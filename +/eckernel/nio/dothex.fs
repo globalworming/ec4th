@@ -12,11 +12,11 @@ DECIMAL
 \G Print a hex digit (10 becomes A, and so on)
   $0f and todigit emit ;
 
-: ERROR" [char] " parse 
-  rot 
-  IF cr ." *** " type ."  ***" -1 ABORT" CROSS: Target error, see text above" 
-  ELSE 2drop 
-  THEN ;
+\ : ERROR" [char] " parse 
+\  rot 
+\  IF cr ." *** " type ."  ***" -1 ABORT" CROSS: Target error, see text above" 
+\  ELSE 2drop 
+\  THEN ;
 
 
 : .xstep ( n f -- n f )
