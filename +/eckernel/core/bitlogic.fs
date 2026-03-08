@@ -1,5 +1,5 @@
 \ +/eckernel/core/bitlogic.fs
-require ../core-ext/constants.fs
+\ require ../core-ext/constants.fs
 \ true, false
 \ require  ../core-ext/control.fs
 \ ?DO

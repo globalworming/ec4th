@@ -6,10 +6,47 @@ require stackmanipulation.fs
 UNDEF-WORDS
 decimal
 
+
+\ adds the length of a char to c_addr1 and returns c_addr2
+: char+ ( c_addr1 -- c_addr2 )
+	1+ ;
+
+\ FIXME: chars tut nichts? ist es wirklich immediate
+\ : chars ( n1 -- n2 ) \ core
+\ ; immediate
+
+
+
+: (chars) ( n1 -- n2 )
+	;
+
+[IFUNDEF] cell
+\G Size of cell in chars, same as "1 cells"
+1 cells Constant cell
+[THEN]
+
+\ adds the length of a cell to a_addr1 and returns a_addr2
+: cell+ ( a_addr1 -- a_addr2 )
+	cell + ;
+
+: cells ( n1 -- n2 )
+	[ cell 2/ dup [IF] ]
+		2*
+	[ [THEN] 2/ dup [IF] ]
+		2*
+	[ [THEN] 2/ dup [IF] ]
+		2*
+	[ [THEN] 2/ dup [IF] ]
+		2*
+	[ [THEN] drop ] ;
+
 \ FIXME: move to nio
 \ read value from variable and prints
-: ?  ( addr -- )
-  @ . ;
+\ : ?  ( addr -- )
+\   @ . ;
+
+: bounds ( addr u -- addr+u addr )
+	over + swap ;
 
 \ add n to the integer saved at a_addr
 : +! ( n a_addr -- )
@@ -33,30 +70,6 @@ decimal
 : 2@ ( a_addr -- w1 w2 )
 	dup cell+ @ swap @ ;
 
-\ adds the length of a cell to a_addr1 and returns a_addr2
-: cell+ ( a_addr1 -- a_addr2 )
-	cell + ;
-
-\ FIXME: -> ?! n1 cell -> n1 cell/2 cell/2 -> n1 cell/2 cell -> usw...
-: cells ( n1 -- n2 )
-	[ cell 2/ dup [IF] ]
-		2*
-	[ [THEN] 2/ dup [IF] ]
-		2*
-	[ [THEN] 2/ dup [IF] ]
-		2*
-	[ [THEN] 2/ dup [IF] ]
-		2*
-	[ [THEN] drop ] ;
-
-\ adds the length of a char to c_addr1 and returns c_addr2
-: char+ ( c_addr1 -- c_addr2 )
-	1+ ;
-
-\ FIXME: chars tut nichts? ist es wirklich immediate
-\ : chars ( n1 -- n2 ) \ core
-\ ; immediate
-
 
 : +! ( n a_addr -- )
 	tuck @ + swap ! ;
@@ -66,13 +79,6 @@ decimal
 
 : 2@ ( a_addr -- w1 w2 )
 	dup cell+ @ swap @ ;
-
-
-: char+ ( c_addr1 -- c_addr2 )
-	1+ ;
-
-: (chars) ( n1 -- n2 )
-	;
 
 : move ( c_from c_to ucount -- )
 	>r 2dup u< IF
@@ -109,9 +115,6 @@ decimal
 
 : +!@ ( n1 a-addr -- n2 )
 	tuck @ + tuck rot ! ;
-
-: bounds ( addr u -- addr+u addr )
-	over + swap ;
 
 : cmove
 	0 ?DO

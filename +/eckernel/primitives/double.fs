@@ -1,7 +1,4 @@
 
-require +/eckernel/compat/undef-words.fs
-require constants.fs
-
 UNDEF-WORDS
 decimal
 

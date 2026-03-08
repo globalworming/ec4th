@@ -1,3 +1,7 @@
+
+TODO: not in use any more remove / maybe save c@ and c!?
+
+
 \ +/eckernel/core/memory.fs
 require ../core-ext/stack.fs
 \ tuck
@@ -112,8 +116,6 @@ decimal
 : ,     ( w -- ) \ core 
     \G Reserve data space for one cell and store @i{w} in the space.
     here cell allot  ! ;
-
-
 : c,    ( c -- ) \ core
     here 1 chars allot c! ;
 
@@ -192,8 +194,6 @@ has? file 0= has? new-input 0= and [IF]
   r>
   r> >in !  r> #tib !  r> >tib !  r> tibstack !  >r ;
 [THEN]
-
-
 
 
 ALL-WORDS

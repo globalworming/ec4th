@@ -1,13 +1,8 @@
-\ +/eckernel/constants-boolean.fs
+
+\ TODO: can be removed, where si case?
 
 UNDEF-WORDS
 decimal
-
-0 Constant false
-\G Boolean false, defined as 0
-
--1 Constant true
-\G Boolean true, defined as -1
  
 [IFUNDEF] case
 0 CONSTANT case ( compilation  -- case-sys ; run-time  -- ) 

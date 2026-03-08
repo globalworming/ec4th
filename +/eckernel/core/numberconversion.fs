@@ -5,8 +5,6 @@ UNDEF-WORDS
 : decimal ( -- ) \ core
     10 base ! ;
 
-
-
 : <# ( -- )  \ core
     pad hld ! ;
 

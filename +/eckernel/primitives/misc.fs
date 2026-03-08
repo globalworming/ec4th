@@ -122,7 +122,6 @@ Create rot-values
 
 AVariable UP
 
-
 has? OS [IF] [THEN]
 : up! ( a_addr -- )
 	up ! ;
