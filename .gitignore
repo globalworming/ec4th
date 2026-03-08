@@ -3,3 +3,4 @@ tags
 doc/crossdoc.fd
 avr.img
 avr.elf
+avr.sym

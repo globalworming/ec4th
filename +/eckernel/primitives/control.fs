@@ -142,7 +142,7 @@ variable itmp
 
 [IFUNDEF] itmp variable itmp [THEN]
 
-: perform ( a_addr -- )
-	@ execute ;
+\ : perform ( a_addr -- )
+\ 	@ execute ;
 
 ALL-WORDS

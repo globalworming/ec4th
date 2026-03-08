@@ -1339,6 +1339,14 @@ Variable mirrored-link          \ linked list for mirrored regions
 \G returns the total area
   dup >rstart @ swap >rlen @ ;
 
+: steal-from-end ( region len -- startadr len)
+\G shrink region at the end and return start and len of the
+\G area
+  tuck
+  over >rlen @ swap - dup 0< abort" CROSS: no sufficient space available"
+  over >rlen !
+  dup >rstart @ swap >rlen @ + swap ;
+
 : dp@ ( region -- dp )
   >rdp @ ;
 

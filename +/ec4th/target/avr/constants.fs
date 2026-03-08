@@ -1,22 +1,5 @@
 HEX
-\ ##################################################DATAS#######################
-\ RAM
-100 constant RAMSTART
-  800 constant RAMEND
 
-	\ 2 constant CELLSIZE \ wird tatsächlich genutzt, habs also drinne gelassen mb-2010/08/18
-
-\ FLASH
-\ FIXME: e2end -> eepromend
-  03FF constant E2END
-  7FFF constant FLASHEND
-
-\ PC len
-\ 2 constant pclen
-
-\ Stack
-32 constant returnStackSize
-RAMEND returnStackSize - constant dataStackStart
 
 \ ################################################REGISTERS#####################
 \ Ports

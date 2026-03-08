@@ -4,6 +4,8 @@ decimal
 \ ##############################Input / Output##################################
 \ ##############################################################################
 
+\ https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf#page=149
+
 \ Initialization: USART0 for atmega-16+
 label usart0_init
 	\ set Power Reduction Register

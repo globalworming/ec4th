@@ -1,11 +1,26 @@
  Create mach-file ," +/ec4th/target/avr/mach-common.fs"
+
+ s" avr.sym" r/w create-file throw value fd-symbol-table
+
 include +/gforth/cross.fs
 
 
 unlock
 
-$F100 $0700 region ram-dictionary
-$0000 $7300 region rom-dictionary
+0 Constant rom-at-0000
+
+
+rom-at-0000 [IF]
+$c100 $07ff region ram-dictionary
+$0000 $ffff region rom-dictionary
+[ELSE]
+$0100 $07ff region ram-dictionary
+$8000 $ffff region rom-dictionary
+[THEN]
+
+\ return stack should have 64 bytes
+ram-dictionary $40 steal-from-end region return-stack
+ram-dictionary $40 steal-from-end region data-stack
 
 setup-target
 
@@ -56,7 +71,7 @@ Decimal
 
 \ TODO: add mirrorram
 \ .sx is not working
- : xy 4711 .x sp0 .x sp@ .x ( 1 2 3 .sx )  depth .x cr ." hello world" cr bye ;
+ : xy 4711 .x sp0 .x sp@ .x 1 2 3 .sx  depth .x cr ." hello world" cr bye ;
 
 \ vektor belegen
  ' xy >body init-ip !
@@ -64,6 +79,7 @@ Decimal
  unlock
 .unresolved
 .regions
+fd-symbol-table close-file throw
 
  \ dictionary dump-region
 

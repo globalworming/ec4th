@@ -1,3 +1,5 @@
+\ 
+
 include macros.fs
 DECIMAL
 
@@ -13,23 +15,55 @@ Label jump-over		0 jmp,
 
 Label intro \ Initialization Block
 Label init-ip    	0 ,
-Label init-ramstart 	$f0 ,
+\ Label init-ramstart 	$f0 ,
+\ Label init-romstart 	$8000 ,
 \ return stack grows downwards from ramend
-Label init-ramend $800 ,
-Label init-dataStack $800 $32 - ,
-init-datastack @ .
-." HELLO"
+
+
+Label init-ramend return-stack-init addr>data ,
+Label init-dataStack data-stack-init addr>data ,
 Label init-uart		0 ,
 Label return		ret,
-return init-uart !
+return addr>pm init-uart !
 
-here jump-over cell+ !
+label xxx
+\	sendZero temp1 mov,
+	\ temp1 have to be filled with data that should be transmitted
+	temp0 UCSR0A in/lds, temp0 5 sbrs, xxx rjmp, \ wait for empty transmit buffer
+	temp1 UDR0 out/sts, \ put data (temp1) into buffer sends the data
+label xxx2
+	temp1 $0a ldi,
+	temp0 UCSR0A in/lds, temp0 5 sbrs, xxx2 rjmp, \ wait for empty transmit buffer
+	\ FIXME: that should be swapped
+	temp1 UDR0 out/sts, \ put data (temp1) into buffer sends the data
+	ret,
+
+
+here addr>pm 2/ jump-over cell+ !
 
 	\ run uart initialization
-	ZL init-uart lowbyte ldi, ZH init-uart highbyte ldi,
-	temp0 lpmz+, temp1 lpmz,
-	ZL temp0 movw,
-	icall,
+\	ZL init-uart lowbyte ldi, ZH init-uart highbyte ldi,
+\	temp0 lpmz+, temp1 lpmz,
+\	ZL temp0 movw,
+\	icall,
+
+\ seems not be needed for sim
+0 [IF]
+	\ set Power Reduction Register
+		temp1 PRR in/lds,
+		r16 %11110001 ldi, r16 temp1 and, r16 PRR out/sts,
+	\ set UCSR0A Register
+		r16 %01100000 ldi, r16 UCSR0A out/sts,
+	\ enable transmit and receive mode via Usart 0
+		r16 %00011000 ldi, r16 UCSR0B out/sts,
+	\ set UCSR0C Register Bits 1, 2 (UCSZ00, UCSZ01)
+		r16 %00000110 ldi, r16 UCSR0C out/sts,
+	\ set baud rate
+		r16 clr, r16 UBRR0H out/sts,
+[THEN]
+
+	temp1 '~ ldi,
+	xxx rcall,
 
 \ other necessary Initializations
 	r16 clr, r16 SMCR out/sts,
@@ -38,59 +72,70 @@ here jump-over cell+ !
 	temp1 clr, sendZero clr,
 
 \ Initialization: Instruction Pointer
-	ZL init-ip lowbyte ldi, ZH init-ip highbyte ldi,
+	init-ip addr>pm 
+	ZL over lowbyte ldi, ZH swap highbyte ldi,
 	IPL lpmz+, IPH lpmz,
 \ Initialization: Return Stack
-	ZL init-ramend lowbyte ldi, ZH init-ramend highbyte ldi,
+	init-ramend addr>pm
+	ZL over lowbyte ldi, ZH swap highbyte ldi,
 	temp0 lpmz+, temp0 SPL out/sts,
 	temp0 lpmz, temp0 SPH out/sts,
 	temp0 clr,
 \ Initialization: Data Stack
-	ZH init-dataStack highbyte ldi, ZL init-dataStack lowbyte ldi,
+	init-dataStack addr>pm
+	ZH over highbyte ldi, ZL swap lowbyte ldi,
 	YL lpmz+, YH lpmz,
 	YL 2 adiw,
-\ Initialization: Ram Start
-	ZL init-ramstart lowbyte ldi, ZH init-ramstart highbyte ldi,
-	ramstart lpmz,
+\ Initialization: Rom Start
+\ FIXME from region
+\    temp0 $80 ldi,
+\	mempivot temp0 mov,
+	mempivot-init,
 
 \ include of blink program at start
 \	include blink.fs
 
 
 Label do_next
-	\ jumps to IP + 2 (next word to execute)
-	ZL IPL movw, \ read IP
+\	temp1 '. ldi,
+\	xxx rcall,
+\ jumps to IP + 2 (next word to execute)
+	ZL IPL movw, \ read IP to Z
 	IPL 2 adiw,
-	\ check if its a ram address
-	ramstart ZH cpc,
+	?rom-address-cp, 
 	0 $ brcs,
-	WL lpmZ+, WH lpmZ+,
+	WL ldZ+, WH ldZ+,
 	1 $ rjmp,
 0 $:
-	WL ldZ+, WH ldZ+,
+	zh-mask-rom-address,     \ Remove high bit marking the rom address
+	WL lpmZ+, WH lpmZ+,
 1 $:
 	ZL WL movw,
-	\ check if its a ram address
-	ramstart ZH cpc,
+	?rom-address-cp, 
 	2 $ brcs,
-	temp0 lpmZ+, temp1 lpmZ+,
-	ZL temp0 movw,
-	\ TODO ijmp is word addressed instructions are always 16 bit, translate in compiler
-	ZH lsr, ZL ror,
-	ijmp,
-2 $:
 	temp0 ldZ+, temp1 ldZ+,
 	ZL temp0 movw,
-	\ TODO ijmp is word addressed instructions are always 16 bit, translate in compiler
-	ZH lsr, ZL ror,
+	zh-mask-rom-address,    \ Remove high bit marking the rom address
+	ZH lsr, ZL ror, \ TODO make doer word addressed to save shifts?
+	ijmp,
+2 $:
+	zh-mask-rom-address,
+	temp0 lpmZ+, temp1 lpmZ+,
+	ZL temp0 movw,
+	zh-mask-rom-address,    \ Remove high bit marking the rom address
+	ZH lsr, ZL ror, \ TODO make doer word addressed to save shifts?
 	ijmp,
 end-label+
+
+unlock 
+rom-dictionary dump-region
+lock
 
 Code: :docol
 	\ start a colon defined forth-word
 	IPH push, IPL push, \ push IP
 	IPL WL movw,
-	IPL 4 adiw, \ FIXME
+	IPL 4 adiw, 
 	do_next rjmp,
 End-Code+
 
@@ -104,7 +149,7 @@ Code: :dovar
 	\ save variable to ram
 	savetos
 	tosl WL movw,
-	tosl 4 adiw, \ FIXME
+	tosl 4 adiw, 
 	do_next rjmp,
 End-Code+
 
@@ -114,54 +159,59 @@ Code: :docon
 	ZL WL movw,
 	ZL 4 adiw,
 	\ FIXME ram/rom unterscheidung
+	zh-mask-rom-address,
 	tosl lpmZ+, tosh lpmZ+,
 	do_next rjmp,
 End-Code+
 
-label dodoes_ram
-	IPL ldZ+, IPH ldZ+,
-	tosl ZL movw,
-	do_next rjmp,
-end-label+
-
 Code: :dodoes
-  savetos \ Tos sichern
+  	savetos
 	IPH push, IPL push, \ IP sichern
 	ZL WL movw, \ im Wort dann
 	ZL 2 adiw,
 	\ check if its a ram address
-	ramstart ZH cpc,
+	?rom-address-cp,
 	0 $ brcc,
-		dodoes_ram rjmp,
-	0 $:
+	zh-mask-rom-address,
 	IPL lpmZ+, IPH lpmZ+,
+	tosl ZL movw,
+	do_next rjmp,
+	0 $:
+	IPL ldZ+, IPH ldZ+,
 	tosl ZL movw,
 	do_next rjmp,
 End-Code+
 
+0 [IF]
 Code execute
 	\ executes forth-word thats address is on the tos
 	WL tosl movw,
 	loadtos
 	ZL WL movw,
 	\ check if its a ram address
-	ramstart ZH cpc,
+	?rom-address-cp,
 	0 $ brcc,
-		0 $ rjmp,
+	0 $ rjmp,
 	0 $:
 	temp1 lpmz+, temp0 lpmz+,
 	ZL temp0 movw,
 	ZH lsr, ZL ror,
 	ijmp,
 End-Code+
+[THEN]
 
 code lit
 \ save a literal to tos, first save current tos to data-stack
-label read_next_flashcell
 	savetos
 	ZL IPL movw,
+	IPL 2 adiw,
+	?rom-address-cp,
+	0 $ brcc,
+	zh-mask-rom-address,
 	tosl lpmZ+, tosh lpmZ+,
-	IPL 2 adiw, \ FIXME
+	do_next rjmp,
+	0 $:
+	tosl ldZ+, tosh ldZ+,
 	do_next rjmp,
 end-code+
 
@@ -170,21 +220,26 @@ end-code+
 \ ##############################################################################
 
 code branch
-	label branch
-		ZL IPL movw,
-		temp0 lpmz+, temp1 lpmz+,
-	label branch-do
-		IPL temp0 add, IPH temp1 adc,
-		do_next rjmp,
+label branch
+	ZL IPL movw,
+	?rom-address-cp,
+	0 $ brcc,
+	zh-mask-rom-address,
+	temp0 lpmz+, temp1 lpmz+,
+	IPL temp0 add, IPH temp1 adc,
+	do_next rjmp,
+	temp0 ldZ+, temp1 ldZ+,
+	IPL temp0 add, IPH temp1 adc,
+	do_next rjmp,
 end-code+
 
 code ?branch
 	tosl tosh or,
 	loadtos
 	branch breq,
-	label skip_next
-		IPL 2 adiw, \ FIXME
-		do_next rjmp,
+label skip_next
+	IPL 2 adiw,
+	do_next rjmp,
 end-code+
 
 code (loop)
@@ -329,29 +384,30 @@ Code @ ( S: addr--n ; R: -- )
 	\ read 1 cell from RAM (or IO/CPU register)
 	ZL tosl movw,
 	\ check if it is not a RAM addr
-	temp1 ramstart mov,
-	temp1 tosh cpc,
+	?rom-address-cp,
   \ Without local labels: here 8 + brcs,
   0 $ brcs,
-	tosl lpmZ+, tosh lpmZ+,
+	tosl ldZ+, tosh ldZ+,
 	do_next rjmp,
 	0 $:
-	tosl ldZ+, tosh ldZ+,
+	zh-mask-rom-address,
+	tosl lpmZ+, tosh lpmZ+,
 	do_next rjmp,
 End-Code+
 
 Code c@ ( S: addr--c ; R: -- )
 	\ fetch a byte from RAM (or IO/CPU register)
 	ZL tosl movw,
+	tosh clr,
 	\ check if it is not a RAM addr
-	temp1 ramstart mov,
-	temp1 tosh cpc, tosh clr,
+	?rom-address-cp,
 	0 $ brcs,
+	tosl ldZ+,
+	do_next rjmp,
+	0 $:
+	zh-mask-rom-address,
 	tosl lpmZ+,
 	do_next rjmp,
-		0 $:
-		tosl ldZ+,
-		do_next rjmp,
 End-Code+
 
 Code ! ( S: n addr-- ; R: -- )
@@ -401,7 +457,6 @@ Code sp@ ( S: --addr ; R: -- )
 	\ returns stack pointer position
 	savetos
 	tosl YL movw,
-	tosh ramstart add,
 	do_next rjmp,
 End-Code+
 
@@ -442,6 +497,11 @@ End-Code+
 \ include io/dot_s.fs
 \ include io/emit_key.fs
 
-here init-dataStack @ $f000 + , Constant sp0
+Label end-primitives
+  data-stack-init
+End-Label+
+
+\ sp0 expected to the a variable
+here swap , Constant sp0
 
 HEX
