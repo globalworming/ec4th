@@ -1,7 +1,6 @@
 \ +/eckernel/core/constants.fs 
 
-NEEDED?
-FIXME: remove
+NEEDED? FIXME: remove
 
 UNDEF-WORDS
 decimal

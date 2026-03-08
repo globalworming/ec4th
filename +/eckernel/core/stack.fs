@@ -1,6 +1,6 @@
 
 \ +/eckernel/core/stack.fs
-require +/eckernel/core/vars.fs
+\ require +/eckernel/core/vars.fs
 UNDEF-WORDS
 
 

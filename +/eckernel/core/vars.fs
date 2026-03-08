@@ -1,3 +1,5 @@
+asdfasdf
+
 \ +/eckernel/core/vars.fs
 require +/eckernel/core/constants.fs
 

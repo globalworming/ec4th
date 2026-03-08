@@ -1,5 +1,7 @@
 \ +/eckernel/core/dictionary
 
+asdf
+
 UNDEF-WORDS
 decimal
 

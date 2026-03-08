@@ -6,6 +6,8 @@ require align.fs
 UNDEF-WORDS
 decimal
 
+32 Constant bl
+
 : emit (emit) ;
 
 : CR \ CORE
