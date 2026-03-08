@@ -32,12 +32,11 @@ include +/ec4th/target/avr/io/uart.fs
 \ include +/ec4th/target/avr/io/dot_s.fs
 include +/ec4th/target/avr/io/emit_key.fs
 
-
 include +/eckernel/core/stack.fs
 include +/eckernel/core/dictionary.fs
+
 include +/eckernel/core/bitlogic.fs
 include +/eckernel/core/io.fs
-
 
 include +/eckernel/primitives/control.fs
 include +/eckernel/primitives/arith.fs

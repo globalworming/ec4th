@@ -46,16 +46,8 @@ UNDEF-WORDS
 : depth ( -- +n ) \ core 
     sp@ sp0 @ swap - cell / ;
 
-: (>r)
-    rp@ cell+ @ rp@ ! rp@ cell+ ! ;
-
-: >r ( w -- )
-    (>r) ;
-
 : 2rdrop ( -- )
 	r> r> drop r> drop >r ;
-
-
 
 : i' ( -- w )
     r> r> r> dup itmp ! >r >r >r itmp @ ;

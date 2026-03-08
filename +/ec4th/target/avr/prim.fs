@@ -127,10 +127,6 @@ Label do_next
 	ijmp,
 end-label+
 
-unlock 
-rom-dictionary dump-region
-lock
-
 Code: :docol
 	\ start a colon defined forth-word
 	IPH push, IPL push, \ push IP
@@ -426,24 +422,6 @@ Code c! ( S: c addr-- ; R: -- )
 	loadtos
 	tosl stZ,
 	loadtos
-	do_next rjmp,
-End-Code+
-
-Code , ( S: n-- ; R: -- )
-	\ writes 16 bit to RAM at actual position
-	ZL IPL movw,
-	1 tosh stdZ, 0 tosl stdZ,
-	loadtos
-	IPL 2 adiw,
-	do_next rjmp,
-End-Code+
-
-Code c, ( S: c-- ; R: -- )
-	\ stores a byte to RAM at actual position
-	ZL IPL movw,
-	tosl stZ,
-	loadtos
-	IPL 1 adiw,
 	do_next rjmp,
 End-Code+
 

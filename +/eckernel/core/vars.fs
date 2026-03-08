@@ -1,14 +1,10 @@
 \ +/eckernel/core/vars.fs
 require +/eckernel/core/constants.fs
+
 UNDEF-WORDS
 decimal
 
-\ FIXME: später wieder als useer definieren
-Variable base
-\ User base
-10 base !
-
-
+User base 10 base !
 
 Variable #tib ( -- a-addr ) \ lenght of input
 0 #tib !
@@ -25,13 +21,10 @@ Variable tdp
 
 Variable hld
 
-variable itmp
-
-\ FIXME: erstmal auskommentiert, kann wieder rein wenn definingwords includiert ist
-\ AUser sp0 ( -- a-addr ) \ gforth
+\ user variable if not defined by machine primitives
+[IFUNDEF] sp0
+AUser sp0 ( -- a-addr ) \ gforth
 \G @code{User} variable -- initial value of the data stack pointer.
-\ sp0 is used by douser:, must be user
-\    ' sp0 Alias s0 ( -- a-addr ) \ gforth
-\G OBSOLETE alias of @code{sp0}
+[THEN]
 
 ALL-WORDS 

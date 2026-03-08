@@ -1,7 +1,7 @@
 \ +/eckernel/core/strings.fs
-require +/eckernel/core-ext/comparison.fs
+\ require +/eckernel/core-ext/comparison.fs
 \ within
-require +/eckernel/core-ext/stack.fs
+\ require +/eckernel/core-ext/stack.fs
 \ tuck
 
 UNDEF-WORDS

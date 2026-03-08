@@ -1,39 +1,24 @@
+
 UNDEF-WORDS
 
-: (>r)
-	rp@ cell+ @ rp@ ! rp@ cell+ ! ;
+\ The following primitives needs to be defined in assembler:
 
-: >r ( w -- )
-	(>r) ;
-
-
-: rdrop ( -- )
-	r> r> drop >r ;
-
-: 2>r ( w1 w2 -- )
-	swap r> swap >r swap >r >r ;
-
-: 2r> ( -- w1 w2 )
-	r> r> swap r> swap >r swap ;
-
-: 2r@ ( -- w1 w2 )
-	i' j ;
-
-: 2rdrop ( -- )
-	r> r> drop r> drop >r ;
-
-: over ( w1 w2 -- w1 w2 w1 )
-	sp@ cell+ @ ;
+\ >r  r> rp@ sp@ 2* + lit
 
 : drop ( w -- )
 	IF THEN ;
 
-Variable (swap)
-: swap ( w1 w2 -- w2 w1 )
-	>r (swap) ! r> (swap) @ ;
-
 : dup ( w -- w w )
 	sp@ @ ;
+
+[IFUNDEF] swap
+Variable swap-tmp
+: swap ( w1 w2 -- w2 w1 )
+	>r swap-tmp ! r> swap-tmp @ ;
+[THEN]
+
+: over ( w1 w2 -- w1 w2 w1 )
+	sp@ cell+ @ ;
 
 : rot ( w1 w2 w3 -- w2 w3 w1 )
 	>r swap r> swap ;
@@ -52,6 +37,23 @@ Variable (swap)
 
 : pick ( u -- w )
 	1+ cells sp@ + @ ;
+
+: rdrop ( -- )
+	r> r> drop >r ;
+
+\ TODO remove the double words from here
+
+: 2>r ( w1 w2 -- )
+	swap r> swap >r swap >r >r ;
+
+: 2r> ( -- w1 w2 )
+	r> r> swap r> swap >r swap ;
+
+: 2r@ ( -- w1 w2 )
+	i' j ;
+
+: 2rdrop ( -- )
+	r> r> drop r> drop >r ;
 
 : 2dup ( w1 w2 -- w1 w2 w1 w2 )
 	over over ;

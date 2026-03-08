@@ -18,6 +18,4 @@ decimal
 : tuck ( n1 n2 - n2 n1 n2 )
     dup -rot ;
 
-
-
 ALL-WORDS 
