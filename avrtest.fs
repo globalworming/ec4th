@@ -77,7 +77,7 @@ include +/gforth/ec/mirror.fs
 
 : test-find \ expect: 0
   ['] print-hello
-  s" print-hell" sfind .sx bye ;
+  s" print-hello" sfind .sx bye ;
 
 \ TODO: add mirrorram
  : xy 
