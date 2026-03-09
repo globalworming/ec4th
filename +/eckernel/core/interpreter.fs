@@ -1,7 +1,8 @@
 
-\ Variable last
-here 0 , Constant last
+Variable last
 \G points to the last defined word
+
+\ F83 word headers, using one byte as length and flags.
 
 hex
 \ class F83 header flags
@@ -21,9 +22,10 @@ decimal
 : name>string ( nfa -- addr count )
   dup char+ swap c@ lcount-mask and ;
 
-\ FIXME: return 0 or != 0 if immediate
-: name>xt ( nfa -- xt +-1 ) 
-  dup c@ swap name>string + aligned swap ( flags xt )
+: name>xt ( nfa -- xt -1/1 ) 
+\G Move from name to xt of a defintion, returning -1 if immediate and 1 if not
+\G The  
+  dup c@ swap name>string + aligned swap ( xt flags )
   dup alias-mask and IF swap @ swap THEN
   immediate-mask and IF -1 ELSE 1 THEN ;
 
@@ -39,6 +41,7 @@ decimal
     dup [ char z 1+ char a 1- ] literal literal within
     IF  [ char a char A - ] literal - THEN ;
 
+\ TODO: change words to lower case and skip char conversion for stored word
 : comparedict ( adr1 len1 adr2 len2 -- flag )
   rot over <> IF 2drop drop true EXIT THEN
   ( adr1 adr2 len )
@@ -47,43 +50,46 @@ decimal
   char+ LOOP
   drop false ;
 
-: search ( adr len lfa -- nfa | 0 )
-  BEGIN dup WHILE >r 2dup r@ cell+ count lcount-mask and 
+: find-name-in ( adr len lfa/wid -- nfa | 0 )
+\G Forth 2012 suggestion, https://forth-standard.org/proposals/find-name#contribution-58
+  BEGIN @ dup WHILE >r 2dup r@ cell+ name>string
         comparedict 0=
-        IF 2drop r> cell+ EXIT THEN r> @
+        IF 2drop r> cell+ EXIT THEN r>
   REPEAT nip nip ;
 
 : find-name ( c-addr u -- nt | 0 ) 
-  last @ search ;
+  last find-name-in ;
 
-: sfind ( c-addr u -- 0 / xt +-1  ) \ GFORTH
-\ used in the interpreter loop
-  find-name dup IF name>xt THEN ;
+\ : sfind ( c-addr u -- 0 / xt +-1  ) \ GFORTH
+\ \ used in the interpreter loop
+\   find-name dup IF name>xt THEN ;
 
-: find ( c-addr -- xt +-1 | c-addr 0 )
-\G Find the definition named in the counted string at c-addr. 6.1.1550 CORE
-  dup count sfind dup IF rot drop THEN ;
+\ new standard word is find-name
+\ : find ( c-addr -- xt +-1 | c-addr 0 )
+\ \G Find the definition named in the counted string at c-addr. 6.1.1550 CORE
+\   dup count sfind dup IF rot drop THEN ;
 
 require simple-accept.fs
 
 require catch-throw.fs
 
-User base
+decimal
+User base 10 base !
 User dpl
+
+decimal
 
 : digit   ( char base -- n true | char false )
 \G Convert a single character to a number in the given base.
 \G Compatibility F83, Open Boot (0xa3)
-  >r upc
-  dup dup [ char A 1- ] literal u>
+  >r upc 
+  dup [ char A 1- ] literal u>
   IF   [ char A 10 - ] literal
   ELSE \ chars between 9 and a (exclusive) are wrong
        dup [char] 9 u> or
        [char] 0
-  THEN
-  - dup r> u< 
-  IF nip true EXIT THEN
-  drop false ;
+  THEN 
+  - dup r> u<  IF nip true EXIT THEN drop false ;
 
 0 [IF]
 \ first version, taken from gforth and reworked
@@ -97,7 +103,7 @@ User dpl
   WHILE  swap J swap >r accumulate r>
   LOOP   0 rdrop EXIT
   THEN   drop 1- I' I - unloop rdrop ;
-[THEN]
+[ELSE]
 
 : (>number) ( ud1 c-addr1 u1 base -- ud2 c-addr2 u2 )
   >r 
@@ -106,15 +112,17 @@ User dpl
   WHILE swap J um* drop rot J um* d+ r> char+ r> 1-
   REPEAT drop r> r> THEN r> drop ;
 
+[THEN]
+
 : >number ( ud1 c-addr1 u1 -- ud2 c-addr2 u2 )
 \ convert to double number until bad char
 \ Compatibility AnsForth (6.1.0570)
   base @ (>number) ;
 
-: $number ( c-addr1 u1 -- u2 )
-\G Convert a string to a number
-\G Compatibility Open Boot
-  >r >r 0 0 r> r> >number 2drop drop ;
+\ : $number ( c-addr1 u1 -- u2 )
+\ \G Convert a string to a number
+\ \G Compatibility Open Boot
+\   >r >r 0 0 r> r> >number 2drop drop ;
 
 hex
 const Create bases   10 ,   2 ,   A , 100 ,
@@ -157,16 +165,10 @@ const Create bases   10 ,   2 ,   A , 100 ,
 
 : s>number? ( addr len -- d f )
 \ converts string addr len into d, flag indicates success
-    sign? >r
-    s>unumber?
-    0= IF
-        rdrop false
+    sign? >r s>unumber? IF  
+        r> IF dnegate THEN true
     ELSE \ no characters left, all ok
-        r>
-        IF
-            dnegate
-        THEN
-        true
+        rdrop false
     THEN ;
 
 : snumber? ( c-addr u -- 0 / n -1 / d 0> )
@@ -185,9 +187,9 @@ const Create bases   10 ,   2 ,   A , 100 ,
     -&13 throw ;
 
 : interpreter ( c-addr u -- ) 
-    2dup sfind
-    IF   
-        execute
+    2dup find-name
+    ?dup IF   
+        name>xt drop execute
     ELSE
 	    2dup snumber?
 	    IF
@@ -207,7 +209,7 @@ const Create bases   10 ,   2 ,   A , 100 ,
 require tib.fs
 require parse-word.fs
 
-: interpret-input ( ?? -- ?? ) \ gforth
+: interpret ( ?? -- ?? ) \ gforth
 \ interpret/compile the (rest of the) input buffer
     BEGIN
 	    ?stack parse-word dup
@@ -218,7 +220,7 @@ require parse-word.fs
 
 : refill ( -- flag ) \ core-ext,block-ext,file-ext
 \G refill the input buffer
-    tib /line accept #tib ! 0 >in ! true ;
+    tib dup >tib ! /line accept #tib ! 0 >in ! true ;
 
 : quit ( -- ) \ CORE
 \G Empty the return stack, make the user input device
@@ -232,5 +234,16 @@ require parse-word.fs
     \ exits only through THROW etc.
     ." ec4th ready" cr \ TODO add version here
     BEGIN
-    	refill drop interpret-input ." ok" cr
+    	refill drop interpret ." ok" cr
     AGAIN ;
+
+: evaluate ( c-addr u -- ) \ core,block
+\G Save the current input source specification. Set @code{>IN} to
+\G @code{0} and make the string @i{c-addr u} the input source
+\G and input buffer. Interpret. When the parse area is empty,
+\G restore the input source specification.
+    >tib @ >r #tib @ >r >in @ >r
+    #tib ! >tib ! >in off
+    ['] interpret catch
+    r> >in ! r> #tib ! r> >tib !
+    throw ;

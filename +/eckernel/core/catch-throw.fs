@@ -1,13 +1,15 @@
-User handler
-
+\ catch and throw
 
 \ sp! and rp! replacements                     8mar26jw
 
 [IFUNDEF] sp!
+
+1 cells 2 <> error" only for 16 bit stack"
+
 : sp! ( addr -- )
-\G Reset stack point to the given address.
+\G Reset stack pointer to the given address.
 \G FIXME: needs testing
-  sp@ swap - 2/ dup 0> IF 
+  sp@ - 2/ dup 0> IF 
     0 DO drop LOOP
   ELSE
     \ going downwards should not happen
@@ -18,9 +20,11 @@ User handler
 
 [IFUNDEF] rp!
 : rp! ( addr -- )
-\G Reset return stack, expects its always reduced
+\G Reset return stack, expects that its always reduced
   r> swap BEGIN dup rp@ <> WHILE rdrop REPEAT drop >r ;
 [THEN]
+
+User handler
 
 : catch
   sp@ >r handler @ >r

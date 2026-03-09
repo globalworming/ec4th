@@ -1,6 +1,4 @@
-
-require +/eckernel/compat/undef-words.fs
-\ require constants.fs
+\ comparisons
 
 UNDEF-WORDS \ define words only if not defined
 
@@ -20,18 +18,28 @@ UNDEF-WORDS \ define words only if not defined
 Constant min-n
 [THEN]
 
-\ compares n with zero, if it is zero return a true flag,
-\ else return a false flag
-: 0= ( n -- f )
-  IF false ELSE true THEN ;
-
-\ if n is not equal to zero return true, else false
-: 0<> ( n -- f )
-  0= 0= ;
+\ compares two unsigned integers u1 and u2, if u1 is less to u2 return true,
+\ else false
+: u< ( u1 u2 -- f )
+	2dup xor 0< IF nip 0< ELSE - 0< THEN ;
 
 \ if n is less zero return true, else false
 : 0< ( n -- f )
 	min-n and 0<> ;
+
+\ if n is not equal to zero return true, else false
+: 0<> ( n -- f )
+	0= 0= ;
+
+\ compares n with zero, if it is zero return a true flag,
+\ else return a false flag
+: 0= ( n -- f )
+	IF false ELSE true THEN ;
+
+\ compares two unsigned integers u1 and u2, if u1 is greater to u2 return true,
+\ else false
+: u> ( u1 u2 -- f )
+	swap u< ;
 
 \ if n is greater zero return true, else false
 : 0> ( n -- f )
@@ -59,7 +67,7 @@ Constant min-n
 
 \ compares n1 with n2, if n1 is greater to n2 return true, else false
 : > ( n1 n2 -- f )
-	swap	< ;
+	swap < ;
 
 \ compares n1 with n2, if n1 is less or equal to n2 return true, else false
 : <= ( n1 n2 -- f )
@@ -67,7 +75,7 @@ Constant min-n
 
 \ compares n1 with n2, if n1 is greater or equal to n2 return true, else false
 : >= ( n1 n2 -- f )
-	swap	<= ;
+	swap <= ;
 
 \ compares two unsigned integers u1 and u2, if they are equal return true,
 \ else false
@@ -77,17 +85,7 @@ Constant min-n
 \ compares two unsigned integers u1 and u2, if they are not equal return true,
 \ else false
 \ : u<> ( u1 u2 -- f )
-\		xor 0<> ;
-
-\ compares two unsigned integers u1 and u2, if u1 is less to u2 return true,
-\ else false
-: u< ( u1 u2 -- f )
-	- min-n and 0<> ;
-
-\ compares two unsigned integers u1 and u2, if u1 is greater to u2 return true,
-\ else false
-: u> ( u1 u2 -- f )
-		swap	u< ;
+\	xor 0<> ;
 
 \ compares two unsigned integers u1 and u2,
 \ if u1 is less or equal to u2 return true, else false
@@ -97,7 +95,7 @@ Constant min-n
 \ compares two unsigned integers u1 and u2,
 \ if u1 is greater or equal to u2 return true, else false
 : u>= ( u1 u2 -- f )
-		swap u<= ;
+	swap u<= ;
 
 \ if u1 is within the range of u2 to u3 return true, else false
 : within ( u1 u2 u3 -- f )

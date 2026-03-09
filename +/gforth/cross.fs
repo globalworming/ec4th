@@ -1786,7 +1786,10 @@ Ghost state drop
   swap -rot bounds ?DO I c@ over X c! X char+ LOOP drop ;
 
 2Variable last-string
-X has? rom [IF] $60 [ELSE] $00 [THEN] Constant header-masks
+
+\ no idea why this mask for rom? commented out, 09mar26;jw
+\ X has? rom [IF] $60 [ELSE] $00 [THEN] Constant header-masks
+0 Constant header-masks
 
 : ht-header,  ( addr count -- )
   dup there swap last-string 2!
@@ -2070,7 +2073,8 @@ variable ResolveFlag
 
 \ : flag! ( 8b -- )   tlast @ dup >r T c@ xor r> c! H ;
 X has? f83headerstring bigendian or [IF] 0 [ELSE] tcell 1- [THEN] Constant flag+
-: flag! ( w -- )   tlast @ flag+ + dup >r T c@ xor r> c! H ;
+: flag! ( w -- ) 
+   tlast @ flag+ + dup >r T c@ xor r> c! H ;
 
 VARIABLE ^imm
 
@@ -2256,7 +2260,8 @@ Defer setup-execution-semantics  ' noop IS setup-execution-semantics
     dup >ghostname there symentry
     dup Last-Header-Ghost ! dup to lastghost
     dup >magic ^imm !     \ a pointer for immediate
-    alias-mask flag!
+    \ In GForth is reversed, in ec4th bit set means alias
+    \ alias-mask flag!
     cross-doc-entry cross-tag-entry 
     setup-execution-semantics
     ;
@@ -2743,7 +2748,9 @@ Cond: DOES>
   executed-ghost @ (THeader 
   dup >created on  dup to created
   2dup takeover-x-semantics
-  there 0 T a, H alias-mask flag!
+  there 0 T a, H 
+  \ In GForth alias is reversed
+  \ alias-mask flag!
   \ store poiter to code-field
   switchram T cfalign H
   there swap T ! H

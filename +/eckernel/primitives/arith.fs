@@ -1,12 +1,10 @@
 \ arith.fs arithmetic primitives replacement 02sep23jaw
 
-require +/eckernel/compat/undef-words.fs
-
-require stackmanipulation.fs
-
 UNDEF-WORDS
 
 decimal
+
+\ TODO: put some more replacements for or, - and 2*
 
 \ ###Shifts###
 
@@ -22,7 +20,7 @@ decimal
 
 \ inverts all bits in u1 i.e. 1010 -> 0101
 : invert ( S: u1--u2 ; R: -- )
-  -1 xor ;
+  	-1 xor ;
 
 \ negates n1
 : negate ( S: n1--n2 ; R: -- )
@@ -41,6 +39,10 @@ decimal
 \ substracts one from the TOS
 : 1- ( S: n1--n2 ; R: -- )
 	1 - ;
+
+\ add two to TOS, this is also aliased to cell+ and common address artihmentic
+: 2+ ( S: n1--n2 ; R: -- )
+	2 + ;
 
 \ multiplies n1 with n2
 : * ( n1 n2 -- n3 )

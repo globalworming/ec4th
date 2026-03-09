@@ -27,9 +27,6 @@ interpreter needs. It relies on >in and source.
   source chars + source drop >in @ chars +
   (skip-white) tuck (parse-white) 
   ( S word-start-addr tib-end-addr word-end-addr )
-  [ \ this operation only works if 1 chars == 1, so warn
-    1 chars 1 <> ERROR" Addressunit must be one char"
-  ]
   nip dup source drop - >in !
   ( S start end-addr ) 
   over - ;

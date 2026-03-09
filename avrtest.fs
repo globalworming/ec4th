@@ -14,8 +14,9 @@ rom-at-0000 [IF]
 $c100 $07ff region ram-dictionary
 $0000 $ffff region rom-dictionary
 [ELSE]
+\ FIXME: why 7ff?
 $0100 $07ff region ram-dictionary
-$8000 $ffff region rom-dictionary
+$8000 $8000 region rom-dictionary
 [THEN]
 
 \ return stack should have 64 bytes
@@ -35,7 +36,6 @@ include +/ec4th/target/avr/io/emit_key.fs
 include +/eckernel/core/stack.fs
 \ include +/eckernel/core/dictionary.fs
 
-include +/eckernel/core/bitlogic.fs
 include +/eckernel/core/io.fs
 
 include +/eckernel/primitives/minimal.fs
@@ -67,9 +67,12 @@ Decimal
 
 >auto
 
-include +/gforth/ec/mirror.fs
-
 : print-hello ." Hello world" cr ;
+
+\ link field
+UNLOCK tlast @ LOCK 
+1 cells - dup 20 tdump
+last !
 
 : test-execute \ expect: Hello world\nBack again
   ['] print-hello execute
@@ -77,12 +80,43 @@ include +/gforth/ec/mirror.fs
 
 : test-find \ expect: 0
   ['] print-hello
-  s" print-hello" sfind .sx bye ;
+  s" print-hello" find-name name>xt drop - 0<> .sx drop ;
+  \  swap name>xt .sx bye ;
+
+: test-parse-word \ expect: abc
+  s" abc 123" #tib ! >tib ! 0 >in ! parse-word type cr ;
+
+: test-min-n 
+  min-n .sx cr drop ;
+
+: test->number 
+  0. s" 123" .sx >number .sx cr ;
+
+: test-sp! \ expect: 0
+  sp@ >r 1 2 3 r> sp! .sx cr ;
+
+: test-rp! \ 52c
+   1324 >r rp@ 1 >r 2 >r 3 >r rp! r> .x drop cr ;
+
+: test-evaluate-123 \ expect: 123
+  s" 123" evaluate .sx cr ;
+
+
+include +/gforth/ec/mirror.fs
 
 \ TODO: add mirrorram
  : xy 
-   mirrorram 
-   \ test-find
+   mirrorram
+   test-execute
+   test-find
+   test-parse-word
+   test-min-n
+   test->number
+   bye
+   test-sp!
+   test-rp!
+   test-evaluate-123
+  bye
    4711 .x cr
    /line .x cr
    tib .x cr
@@ -92,10 +126,6 @@ include +/gforth/ec/mirror.fs
  ' xy >body init-ip !
 
 \ Set up last and forth-wordlist with the address of the last word's
-\ link field
-UNLOCK tlast @ LOCK 
-1 cells - dup 20 tdump
-last !
 
  unlock
 .unresolved

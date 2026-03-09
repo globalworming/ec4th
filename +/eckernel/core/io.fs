@@ -1,7 +1,6 @@
 \ +/eckernel/core/io.fs
 
 require strings.fs
-require align.fs
 
 \ UNDEF-WORDS
 decimal

@@ -30,6 +30,8 @@ decimal
 : 1- ( S: n1--n2 ; R: -- ) \  core
     1 - ;
 
+\ FIXME: move
+
 : 2* ( n1 - 2*n1 ) \ core
     dup + ;
 
