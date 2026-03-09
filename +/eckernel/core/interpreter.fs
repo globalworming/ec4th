@@ -43,17 +43,16 @@ decimal
 
 \ TODO: change words to lower case and skip char conversion for stored word
 : comparedict ( adr1 len1 adr2 len2 -- flag )
-  rot over <> IF 2drop drop true EXIT THEN
+  rot over <> IF 2drop drop false EXIT THEN
   ( adr1 adr2 len )
   bounds ?DO dup c@ upc I c@ upc <> 
              IF drop UNLOOP false EXIT THEN 
   char+ LOOP
-  drop false ;
+  drop true ;
 
 : find-name-in ( adr len lfa/wid -- nfa | 0 )
 \G Forth 2012 suggestion, https://forth-standard.org/proposals/find-name#contribution-58
-  BEGIN @ dup WHILE >r 2dup r@ cell+ name>string
-        comparedict 0=
+  BEGIN @ dup WHILE >r 2dup r@ cell+ name>string comparedict
         IF 2drop r> cell+ EXIT THEN r>
   REPEAT nip nip ;
 
@@ -82,14 +81,13 @@ decimal
 : digit   ( char base -- n true | char false )
 \G Convert a single character to a number in the given base.
 \G Compatibility F83, Open Boot (0xa3)
-  >r upc 
-  dup [ char A 1- ] literal u>
-  IF   [ char A 10 - ] literal
+  >r upc
+  dup dup [ char A 1- ] literal u>
+  IF   [ char A 10 - ] literal ( S: c n R: base )
   ELSE \ chars between 9 and a (exclusive) are wrong
        dup [char] 9 u> or
        [char] 0
-  THEN 
-  - dup r> u<  IF nip true EXIT THEN drop false ;
+  THEN - dup r> u< IF nip true EXIT THEN drop false ;
 
 0 [IF]
 \ first version, taken from gforth and reworked
@@ -189,11 +187,13 @@ const Create bases   10 ,   2 ,   A , 100 ,
 : interpreter ( c-addr u -- ) 
     2dup find-name
     ?dup IF   
-        name>xt drop execute
+        nip nip name>xt drop execute
     ELSE
-	    2dup snumber?
+        2dup 2>r
+        snumber? ( n -1 | d >0)
+        \ snumber? has variable stack effect
 	    IF
-	        nip nip
+	        2rdrop
 	    ELSE
 	        2r> interpreter-notfound
 	    THEN
@@ -211,25 +211,21 @@ require parse-word.fs
 
 : interpret ( ?? -- ?? ) \ gforth
 \ interpret/compile the (rest of the) input buffer
-    BEGIN
-	    ?stack parse-word dup
-    WHILE
-	    interpreter
-    REPEAT
-    2drop ;  
+    BEGIN ?stack parse-word dup WHILE interpreter REPEAT 2drop ;  
 
 : refill ( -- flag ) \ core-ext,block-ext,file-ext
 \G refill the input buffer
     tib dup >tib ! /line accept #tib ! 0 >in ! true ;
 
+\ FIXME catch not found properly
 : quit ( -- ) \ CORE
 \G Empty the return stack, make the user input device
 \G the input source, enter interpret state and start
 \G the text interpreter.
     $0a base !
-\ FIXME: test reset
- \   [ unlock data-stack borders nip lock ] literal sp!
- \   [ unlock return-stack borders nip lock ] literal rp!
+\ FIXME: test reset, sp! needed here?
+    [ unlock data-stack borders nip lock ] literal sp!
+    [ unlock return-stack borders nip lock ] literal rp!
     handler off 
     \ exits only through THROW etc.
     ." ec4th ready" cr \ TODO add version here

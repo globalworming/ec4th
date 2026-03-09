@@ -4,16 +4,16 @@
 
 [IFUNDEF] sp!
 
-1 cells 2 <> error" only for 16 bit stack"
-
 : sp! ( addr -- )
 \G Reset stack pointer to the given address.
-\G FIXME: needs testing
-  sp@ - 2/ dup 0> IF 
+  sp@ cell+ - 
+  [ 1 cells 2 <> error" sp! replacement only for 16 bit stack" ]
+  2/ dup 0> IF 
     0 DO drop LOOP
   ELSE
     \ going downwards should not happen
     \ however, we can keep the contents intact via sp@
+    \ FIXME needs testig
     0 ?DO sp@ @ LOOP
   THEN ;
 [THEN]
@@ -26,7 +26,7 @@
 
 User handler
 
-: catch
+: catch ( ct -- .... 0 / error )
   sp@ >r handler @ >r
   rp@ handler ! execute
   r> handler ! rdrop 0 ;
