@@ -16,16 +16,7 @@ decimal
     tuck - >r chars + r> ;
 
 
-: upc ( c1 -- c2 )
-\G Convert ASCII c1 to uppercase. Input values from ASCII a-z are converted to A-Z,
-\G all other values are unchanged
-    dup [ char z 1+ char a 1- ] literal literal within
-    IF  [ char a char A - ] literal - THEN ;
 
-: type ( addr u -- ) \ core
-    0 DO
-      dup c@ (emit) 1+
-    LOOP drop ;
 
 : count ( c_addr1 -- c_addr u ) \ core
     dup 1+ swap c@ ;

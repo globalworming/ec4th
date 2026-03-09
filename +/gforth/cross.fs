@@ -18,8 +18,7 @@
 \ You should have received a copy of the GNU General Public License
 \ along with this program. If not, see http://www.gnu.org/licenses/.
 
-0 
-[IF]
+0 [IF]
 
 ToDo:
 - Crossdoc destination ./doc/crossdoc.fd makes no sense when

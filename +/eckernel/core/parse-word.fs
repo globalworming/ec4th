@@ -8,8 +8,6 @@ interpreter needs. It relies on >in and source.
 
 [THEN]
 
-require +/eckernel/tib/tib.fs
-
 : (skip-white) ( c-addr2 c-addr1 -- c-addr2 c-addr3 )
 \ skip until end (addr2 is reached) or as long whitespace as
 \ (tab, space, newline, here: everything below 33)

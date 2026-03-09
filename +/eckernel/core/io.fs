@@ -3,30 +3,55 @@
 require strings.fs
 require align.fs
 
-UNDEF-WORDS
+\ UNDEF-WORDS
 decimal
-
-32 Constant bl
 
 : emit (emit) ;
 
-: CR \ CORE
-    10 32 emit emit ;
+: (.")
+    "lit count type ;
+
+: "lit ( -- addr )
+    r> r> dup count + aligned >r swap >r ;
+
+: type ( addr u -- ) \ core
+    0 DO
+      dup c@ (emit) 1+
+    LOOP drop ;
+
+\ Input                                                13feb93py
+
+hex
+20 Constant bl
+07 constant #bell ( -- c ) \ gforth
+08 constant #bs ( -- c ) \ gforth
+09 constant #tab ( -- c ) \ gforth
+7F constant #del ( -- c ) \ gforth
+0D constant #cr   ( -- c ) \ gforth
+\ the newline key code
+0C constant #ff ( -- c ) \ gforth
+0A constant #lf ( -- c ) \ gforth
+decimal
+
+: bell  #bell emit [ has? os [IF] ] outfile-id flush-file drop [ [THEN] ] ;
+
+: cr ( -- ) \ core c-r
+\G Output a newline (of the favourite kind of the host OS).  Note
+\G that due to the way the Forth command line interpreter inserts
+\G newlines, the preferred way to use @code{cr} is at the start
+\G of a piece of text; e.g., @code{cr ." hello, world"}.
+    #cr emit #lf emit ;
+
+: space ( -- ) \ core
+\G Display one space.
+  bl emit ;
 
 \ : ?  ( addr -- )
 \   @ . ;
 
-: space ( -- ) \ core
-    bl emit ;
-
 : spaces ( n1 -- ) \ core
     0 DO space LOOP ;
 
-: (.")
-	"lit count type ;
-
-: "lit ( -- addr )
-  r> r> dup count + aligned >r swap >r ;
 
 \ : (ud.) ( ud -- c-addr cnt )
 \   <# #s #> ;

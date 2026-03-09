@@ -39,11 +39,10 @@ include +/eckernel/core/bitlogic.fs
 include +/eckernel/core/io.fs
 
 include +/eckernel/primitives/minimal.fs
-include +/eckernel/primitives/arith.fs
-include +/eckernel/primitives/comparisons.fs
-include +/eckernel/primitives/double.fs
 
 include +/eckernel/nio/dothex.fs
+
+include +/eckernel/core/interpreter.fs
 
 \ da muss jens ran:
 \ include +/eckernel/todo/int.fs
@@ -68,12 +67,35 @@ Decimal
 
 >auto
 
+include +/gforth/ec/mirror.fs
+
+: print-hello ." Hello world" cr ;
+
+: test-execute \ expect: Hello world\nBack again
+  ['] print-hello execute
+  ." Back again" cr ;
+
+: test-find \ expect: 0
+  ['] print-hello
+  s" print-hell" sfind .sx bye ;
+
 \ TODO: add mirrorram
-\ .sx is not working
- : xy 4711 .x sp0 .x sp@ .x 1 2 3 .sx  depth .x cr ." hello world" cr bye ;
+ : xy 
+   mirrorram 
+   \ test-find
+   4711 .x cr
+   /line .x cr
+   tib .x cr
+   sp0 .x sp@ .x 1 2 3 .sx  depth .x drop drop drop cr ." hello world" cr words cr quit bye ;
 
 \ vektor belegen
  ' xy >body init-ip !
+
+\ Set up last and forth-wordlist with the address of the last word's
+\ link field
+UNLOCK tlast @ LOCK 
+1 cells - dup 20 tdump
+last !
 
  unlock
 .unresolved

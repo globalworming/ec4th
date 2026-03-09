@@ -29,7 +29,7 @@ decimal
 
 : h# ( -- u )
 \G minimalistic parsing of a hex number
-\G no error checking is don
+\G no error checking is done
 \ test condition: works!
   parse-word bounds swap >r >r 0
   BEGIN r@ I' xor

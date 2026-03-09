@@ -14,7 +14,7 @@ and code-fields...) into rom and copy it back at system startup.
 >rom
 unlock ram-dictionary extent lock		
 Constant ram-len
-Constant ram-start
+Constant r  
 Variable ram-origin
 ram-start ram-origin ram-len unlock tcmove lock 
 ram-len allot align

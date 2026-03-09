@@ -1,9 +1,5 @@
 \ string.fs
 
-require +/eckernel/compat/undef-words.fs
-
-require stackmanipulation.fs
-
 UNDEF-WORDS
 decimal
 
