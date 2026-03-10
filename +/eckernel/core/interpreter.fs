@@ -181,7 +181,7 @@ const Create bases   10 ,   2 ,   A , 100 ,
     THEN ;
 
 : interpreter-notfound  ( addr u -- )
-    2drop 
+    ." ?! " type space
     -&13 throw ;
 
 : interpreter ( c-addr u -- ) 
@@ -203,8 +203,7 @@ const Create bases   10 ,   2 ,   A , 100 ,
     sp@ sp0 @ u> IF    -4 throw  THEN
 [ has? floating [IF] ]
     fp@ fp0 @ u> IF  -&45 throw  THEN
-[ [THEN] ]
-; 
+[ [THEN] ] ; 
 
 require tib.fs
 require parse-word.fs
@@ -217,20 +216,26 @@ require parse-word.fs
 \G refill the input buffer
     tib dup >tib ! /line accept #tib ! 0 >in ! true ;
 
-\ FIXME catch not found properly
+: quit-error ( ... n -- ... )
+\ target for throw if no catch handler is defined
+\ we don't use catch in quit, so the stack contents keep
+\ intact when user has a typo ;jw
+      ." error: " .x quit ;
+
 : quit ( -- ) \ CORE
 \G Empty the return stack, make the user input device
 \G the input source, enter interpret state and start
 \G the text interpreter.
-    $0a base !
-\ FIXME: test reset, sp! needed here?
-    [ unlock data-stack borders nip lock ] literal sp!
+    \ don't reset sp. user might have a typo
+    \ [ unlock data-stack borders nip lock ] literal sp!
     [ unlock return-stack borders nip lock ] literal rp!
     handler off 
     \ exits only through THROW etc.
-    ." ec4th ready" cr \ TODO add version here
     BEGIN
-    	refill drop interpret ." ok" cr
+        [ defined? prompt  [IF] ] prompt
+        [ [ELSE] ] ." ok" cr
+        [ [THEN] ]
+    	refill drop interpret 
     AGAIN ;
 
 : evaluate ( c-addr u -- ) \ core,block

@@ -35,7 +35,7 @@ doer? :dofield 0= [IF] \D compileddofillers .( DOFIELD )
 [THEN]
 
 doer? :dodefer 0= [IF] \D compileddofillers .( DODEFER )
-| : Defer ( "name" -- ) DOES> @ execute ;
+| : Defer ( "name" -- ) DOES> .sx cr @ .sx cr execute ;
 [THEN]
 
 \D compileddofillers .( DO2CON )

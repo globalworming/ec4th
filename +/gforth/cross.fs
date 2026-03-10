@@ -2749,7 +2749,7 @@ Cond: DOES>
   dup >created on  dup to created
   2dup takeover-x-semantics
   there 0 T a, H 
-  \ In GForth alias is reversed
+  \ In GForth alias is reversed? 2026-03-09;jw
   \ alias-mask flag!
   \ store poiter to code-field
   switchram T cfalign H
@@ -2760,6 +2760,10 @@ Cond: DOES>
 : Build:  ( -- [xt] [colon-sys] )
   :noname postpone TCreate ;
 
+\ For a forth supporting ROM, a simple approach is to put the
+\ whole code field into RAM.
+\ Downside: wasting space and if we want an interpreter in the target
+\ FIXME: name>xt needs to be aware of this trick ;jw
 : BuildSmart:  ( -- [xt] [colon-sys] )
   :noname
   [ T has? rom H [IF] ]
@@ -2823,9 +2827,19 @@ Builder 2Constant
 Build:  ( d -- ) T , , H ;Build
 DO: ( ghost -- d ) T dup cell+ @ swap @ H ;DO
 
+\ Don't use buildsmart, for create, we need to save ram 2026-03-10;jw
+\ Builder Create
+\ BuildSmart: ;Build
+\ by: :dovar ( target-body-addr -- addr ) ;DO
+
 Builder Create
-BuildSmart: ;Build
-by: :dovar ( target-body-addr -- addr ) ;DO
+T has? rom H [IF]
+Build: ( -- ) T here 0 A, H switchram T align here swap ! H ( switchrom ) ;Build
+by (Constant)
+[ELSE]
+Build: ;Build
+by: :dovar ;DO
+[THEN]
 
 Builder Variable
 T has? rom H [IF]
@@ -2909,7 +2923,7 @@ T has? rom-value H [IF]
 \ compiles word header to rom and data field in ram
 Builder (Value)
 Build:  ( n -- ) ;Build
-by: :dovalue ( target-body-addr -- n ) T @ @ H ;DO
+by: :dovalue-rom ( target-body-addr -- n ) T @ @ H ;DO
 
 Builder Value
 Build: T here 0 A, H switchram T align here swap ! , H ;Build
@@ -2941,7 +2955,7 @@ Defer texecute
 Builder Defer
 T has? rom-defer H [IF]
     Build: ( -- )  T here 0 A, H switchram T align here swap ! H [T'] noop T A, H ( switchrom ) ;Build
-    by: :dodefer ( ghost -- ) X @ X @ texecute ;DO
+    by: :dodefer-rom ( ghost -- ) X @ X @ texecute ;DO
 [ELSE]
     BuildSmart:  ( -- ) [T'] noop T A, H ;Build
     by: :dodefer ( ghost -- ) X @ texecute ;DO
@@ -3285,13 +3299,13 @@ Cond: ABORT"    if, ahead, there [char] " parse ht-string, X align
                 >r then, r> compile ALiteral compile c(abort") then, ;Cond
 [THEN]
 
-X has? rom [IF]
+X has? rom-defer [IF]
 Cond: IS        T ' >body @ H compile ALiteral compile ! ;Cond
 : IS            T >address ' >body @ ! H ;
 Cond: TO        T ' >body @ H compile ALiteral compile ! ;Cond
 : TO            T ' >body @ ! H ;
-Cond: CTO       T ' >body H compile ALiteral compile ! ;Cond
-: CTO           T ' >body ! H ;
+\ Cond: CTO       T ' >body H compile ALiteral compile ! ;Cond
+\ : CTO           T ' >body ! H ;
 [ELSE]
 Cond: IS        T ' >body H compile ALiteral compile ! ;Cond
 : IS            T >address ' >body ! H ;

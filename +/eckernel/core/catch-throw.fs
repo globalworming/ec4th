@@ -2,6 +2,8 @@
 
 \ sp! and rp! replacements                     8mar26jw
 
+\ NEEDS MORE TESTING!!!
+
 [IFUNDEF] sp!
 
 : sp! ( addr -- )
@@ -33,7 +35,7 @@ User handler
 
 : throw
   ?dup IF handler @ 
-    dup 0= IF quit THEN
+    dup 0= IF drop quit-error THEN
     rp! r> handler !
     r> swap >r sp! drop r>
   THEN ;
