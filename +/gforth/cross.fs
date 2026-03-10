@@ -3344,7 +3344,9 @@ Cond: postpone ( -- ) \ name
       ABORT" CROSS: Can't postpone on forward declaration"
       dup >magic @ <imm> =
       IF   (gexecute)
-      ELSE >link @ alit, compile compile,  THEN ;Cond
+      ELSE >link @ alit, 
+            compile compile, 
+      THEN ;Cond
 	   
 \ save-cross                                           17mar93py
 

@@ -26,6 +26,14 @@
   r> swap BEGIN dup rp@ <> WHILE rdrop REPEAT drop >r ;
 [THEN]
 
+User "error
+
+: .error ( throw-code -- )
+  dup -2 = 
+  IF 	  "error @ ?dup IF count type THEN drop
+  ELSE	." error: " .x
+  THEN ;
+
 User handler
 
 : catch ( ct -- .... 0 / error )
@@ -35,7 +43,7 @@ User handler
 
 : throw
   ?dup IF handler @ 
-    dup 0= IF drop quit-error THEN
+    dup 0= IF drop .error quit THEN
     rp! r> handler !
     r> swap >r sp! drop r>
   THEN ;

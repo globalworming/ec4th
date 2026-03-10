@@ -6,11 +6,10 @@ hex
 
 \ FIXME: move this to somewhere general?!
 | : .char ( c -- )
-  dup 7f bl within
-  IF  drop [char] .  THEN  emit ;
+    dup 7f bl within IF  drop [char] .  THEN  emit ;
 
 | : dumpcharline ( addr len -- )
-  10 min bounds ?DO I c@ .char LOOP ;
+    10 min bounds ?DO I c@ .char LOOP ;
 
 | : dumphalfbyteline ( end-addr addr -- end-addr addr )
   08 00

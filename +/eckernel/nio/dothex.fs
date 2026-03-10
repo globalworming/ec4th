@@ -2,7 +2,11 @@
 
 \ This is a number output package which should be sufficient
 \ for most embedded interactive debugging sessions.
-\ No additional memory is needed.
+\ 
+\ Advantage over number IO with <# #s #>:
+\
+\ - Does not need additional memory
+\ - Only uses bit shifting and does not need division
 
 DECIMAL
  : todigit ( u -- c ) 
@@ -17,7 +21,6 @@ DECIMAL
 \  IF cr ." *** " type ."  ***" -1 ABORT" CROSS: Target error, see text above" 
 \  ELSE 2drop 
 \  THEN ;
-
 
 : .xstep ( n f -- n f )
 \G Basic idea is print the highest digit and
@@ -54,7 +57,7 @@ DECIMAL
 
 : .byte ( n -- )
 \G Prints a hex byte in fixed to digit format with a trailing space.
-  dup 4 lshift .xdigit .xdigit space ;
+  dup 4 rshift .xdigit .xdigit space ;
 
 : .$ ( n -- ) 
 \G Prints a hex number with a leading $ sign and a trailing space.
@@ -62,9 +65,7 @@ DECIMAL
 
 : .sx
   depth
-  dup [char] < emit .x 8 emit [char] > emit space dup
-  0 ?DO dup pick .x 1- LOOP 13 emit 10 emit drop ;
+  dup [char] < emit .x [char] > emit space dup
+  0 ?DO dup pick .x 1- LOOP cr drop ;
 
-: n.x ( n -- )
- 0 do .x loop
-;
+\ : n.x ( n -- ) 0 do .x loop ;

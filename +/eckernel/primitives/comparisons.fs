@@ -109,4 +109,14 @@ Constant min-n
 : min ( S: n1 n2--n ; R: -- )
 	2dup > IF swap THEN drop ;
 
+\ TODO: move umin and umax extra?
+
+\ core-ext
+: umin ( u1 u2 -- u )
+  	2dup u< IF drop ELSE nip THEN ;
+
+\ core-ext
+: umax ( u1 u2 -- u )
+  	2dup U< IF nip ELSE drop THEN ;
+
 ALL-WORDS

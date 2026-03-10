@@ -1,13 +1,247 @@
 
+
+\ Stripped down compiler based on what we had in GForth around 2008.
+\ Not 100% standards compatible: IS does not have different compile 
+\ and interpretation semantics, use [IS] 
+
+ Variable state ( -- a-addr ) \ core,tools-ext
+ \G @code{User} variable -- @i{a-addr} is the address of a cell
+ \G containing the compilation state flag. 0 => interpreting, -1 =>
+ \G compiling. 
+ 0 state !
+
+\ the pointer to the current dictionary pointer
+Variable dp	
+
+: here dp @ ;
+
+\ we default to this version if we have nothing else 05May99jaw
+\ check dictionary region 10mar26jaw
+: allot ( n -- ) \ core
+\G Reserve @i{n} address units of data space without
+\G initialization. @i{n} is a signed number, passing a negative
+\G @i{n} releases memory.
+    here +
+    dup 1- [ unlock ram-dictionary borders lock ] literal literal  within -8 and throw
+    dp ! ;
+
+: c,    ( c -- ) \ core c-comma
+\G Reserve data space for one char and store @i{c} in the space.
+    here 1 chars allot c! ;
+
+: ,     ( w -- ) \ core comma
+\G Reserve data space for one cell and store @i{w} in the space.
+    here cell allot ! ;
+
+\ defined in primitives/memory.fs
+\ : aligned ( addr -- addr' ) \ core
+\    [ cell 1- ] Literal + [ -1 cells ] Literal and ;
+
+: align ( -- ) \ core
+\G If the data-space pointer is not aligned, reserve enough space to align it.
+    here dup aligned swap ?DO  bl c,  LOOP ;
+
+\G GForth EC / ec4th switch that the next defining word data goes to ROM
+' noop ALIAS const
+
+: string, ( c-addr u -- ) \ gforth
+\G puts down string as cstring, the resulting DP may be not aligned
+    dup c, here swap chars dup allot move ;
+
+' , Alias compile,
+
+\ \ literals							17dec92py
+
+: Literal  ( compilation n -- ; run-time -- n ) \ core
+\G Compilation semantics: compile the run-time semantics.@*
+\G Run-time Semantics: push @i{n}.@*
+\G Interpretation semantics: undefined.
+[ [IFDEF] lit, ]
+    lit,
+[ [ELSE] ]
+    \ did not work: 
+    postpone lit ,
+    \ ['] lit , ,
+[ [THEN] ] ; immediate restrict
+
+: [char] ( compilation '<spaces>ccc' -- ; run-time -- c ) \ core bracket-char
+\G Compilation: skip leading spaces. Parse the string
+\G @i{ccc}. Run-time: return @i{c}, the display code
+\G representing the first character of @i{ccc}.  Interpretation
+\G semantics for this word are undefined.
+    char postpone Literal ; immediate restrict
+
+: [']  ( compilation. "name" -- ; run-time. -- xt ) \ core      bracket-tick
+\g @i{xt} represents @i{name}'s interpretation
+\g semantics. Perform @code{-14 throw} if the word has no
+\g interpretation semantics.
+    ' postpone Literal ; immediate restrict
+
+: postpone ( "name" -- ) \ core
+\g Compiles the compilation semantics of @i{name}.
+    (') name>xt compile, ; immediate restrict
+
+\ \ compiler loop
+
+: compiler ( c-addr u -- )
+    2dup find-name dup
+    IF  ( c-addr u nt )
+	    nip nip name>xt
+        immediate-mask and IF execute ELSE compile, THEN
+    ELSE
+        drop
+        2dup snumber? dup
+        IF
+            0> IF swap postpone Literal THEN
+            postpone Literal
+            2drop
+        ELSE
+            drop notfound
+        THEN
+    THEN ;
+
+\ GForth also uses the defined word parser and prompt,
+\ we use only state here for simplicity ;jw
+
+: [ ( -- ) \  core	left-bracket
+\G Enter interpretation state. Immediate word.
+    state off ; immediate
+
+: ] ( -- ) \ core	right-bracket
+\G Enter compilation state.
+    state on ;
+
+\ \ Strings							22feb93py 10mar27jaw
+
+\ scan and parse is needed here by the compiler, so keep the definition
+\ here, although it is related to the parsing
+
+: scan   ( addr1 n1 char -- addr2 n2 )
+\G Skip all characters not equal to char
+\G Compatibility GForth, F83
+   >r 
+   BEGIN dup WHILE over c@ r@ <> WHILE 1 /string
+   REPEAT THEN rdrop ;
+
+: parse ( delim -- c-addr len )
+\ Return the next string from the input buffer delimited by delim.
+\ do not skip white space, since string may have leading spaces, e.g. ."  hello"
+\ Compatibity Open Boot
+  >r source >in @ /string over -rot r> scan 
+  dup IF 1- THEN source nip swap - >in !  over -
+\  [ \ this operation only works if 1 chars == 1, so warn
+\    1 chars 1 <> ERROR" Addressunit must be one char"
+\  ]
+   ;
+
+: ," ( "string"<"> -- ) 
+    [char] " parse string, align ;
+
+: SLiteral ( Compilation c-addr1 u ; run-time -- c-addr2 u ) \ string
+\G Compilation: compile the string specified by @i{c-addr1},
+\G @i{u} into the current definition. Run-time: return
+\G @i{c-addr2 u} describing the address and length of the
+\G string.
+    postpone (S") string, ; immediate restrict
+
 : \ ( compilation 'ccc<newline>' -- ; run-time -- ) \ thisone- core-ext,block-ext backslash
     source >in ! drop ; immediate
 
 : ( ( compilation 'ccc<close-paren>' -- ; run-time -- ) \ thisone- core,file	paren
     [char] ) parse 2drop ; immediate
 
-Variable state
-Defer prompt
+\ \ abort"							22feb93py
 
-: (prompt)        state @ IF ."  compiled" EXIT THEN ."  ok" ;
-' (prompt) is prompt
+: (abort")
+    "lit >r IF r> "error ! -2 throw THEN rdrop ;
+
+: ." postpone (.") ," ; immediate restrict
+
+: s" postpone (s") ," ; immediate restrict
+
+: abort" ( compilation 'ccc"' -- ; run-time f -- ) \ core,exception-ext	abort-quote
+\G If any bit of @i{f} is non-zero, perform the function of @code{-2 throw},
+\G displaying the string @i{ccc} if there is no exception frame on the
+\G exception stack.
+    postpone (abort") ," ;        immediate restrict
+
+Variable current
+Variable last
+Variable lastxt
+
+: recurse ( compilation -- ; run-time ?? -- ?? ) \ core
+    \g Call the current definition.
+    lastxt @ , ; immediate restrict
+
+\ \ Header states						23feb93py
+
+: cset ( bmask c-addr -- )
+    tuck c@ or swap c! ; 
+
+: creset ( bmask c-addr -- )
+    tuck c@ swap invert and swap c! ; 
+
+: ctoggle ( bmask c-addr -- )
+    tuck c@ xor swap c! ; 
+
+: ?last-cset
+  last @ ?dup IF swap cset THEN ;
+
+: immediate ( -- ) \ core
+    \G Make the compilation semantics of a word be to @code{execute}
+    \G the execution semantics.
+    immediate-mask ?last-cset ;
+
+: restrict ( -- ) \ gforth
+    \G A synonym for @code{compile-only}
+    restrict-mask ?last-cset ;
+
+: header ( "name" -- )
+    parse-word name-too-short? name-too-long?
+    align here last ! current @ @ , \ link field
+    string, ;
+
+\ Create Variable User Constant                        	17mar93py
+
+: Alias    ( xt "name" -- ) \ gforth
+    Header reveal alias-mask ?last-cset , ;
+
+0 Constant defstart
+
+: ?struc ( colon-sys -- )
+\G expects 0 to check for imablanced conditionals
+    abort" unstructured " ;
+
+: colon-cf, ( -- colon-sys )
+    \ common factor of : and :noname
+    align here lastxt ! lit :docol , 0 , defstart ] ;
+
+: : ( "name" -- colon-sys ) \ core	colon
+    Header colon-cf, ;
+
+: :noname ( -- xt colon-sys ) \ core-ext	colon-no-name
+    0 last ! colon-cf, ;
+
+: check-shadow  ( addr count wid -- )
+\G prints a warning if the string is already present in the wordlist
+    >r 2dup 2dup r> find-name-in  ?dup if
+    	." redefined " name>string 2dup type
+	    comparedict 0<> if
+	        ."  with " type
+	    else
+	        2drop
+	    then
+	    space space EXIT
+    then
+    2drop 2drop ;
+
+: reveal ( -- ) \ gforth
+    last @ ?dup
+    IF \ the last word has a header
+        dup cell+ name>string current @ check-shadow
+        current @ !
+        last off
+    THEN ;
+
+: ; ?struc reveal postpone ;s postpone [ ; immediate restrict
 

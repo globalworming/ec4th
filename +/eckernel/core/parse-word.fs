@@ -6,6 +6,8 @@
 Defined parse-word. This is the only parsing word an interactive
 interpreter needs. It relies on >in and source.
 
+The compiler also defined scan and parse.
+
 [THEN]
 
 : (skip-white) ( c-addr2 c-addr1 -- c-addr2 c-addr3 )
@@ -22,12 +24,13 @@ interpreter needs. It relies on >in and source.
 
 : parse-word ( -- c-addr len )
 \ Skip whitespace characters and return the next word from
-\ the input buffer delimited by whitespace.
-\ Compatibity Open Boot
+\ the input buffer delimited by whitespace. The input buffer
+\ pointer is advanced and skips one delemiting whitespace character. But only one.
+\ Compatibity Open Boot?
   source chars + source drop >in @ chars +
   (skip-white) tuck (parse-white) 
   ( S word-start-addr tib-end-addr word-end-addr )
-  nip dup source drop - >in !
+  nip dup source drop - char+ source nip min >in !
   ( S start end-addr ) 
   over - ;
 

@@ -42,8 +42,12 @@ include +/eckernel/core/io.fs
 include +/eckernel/primitives/minimal.fs
 
 include +/eckernel/nio/dothex.fs
+include +/eckernel/debug/dump.fs
 
+include +/eckernel/core/compiler.fs
 include +/eckernel/core/interpreter.fs
+include +/eckernel/core/flow-control.fs
+
 
 include +/eckernel/primitives/doers.fs
 
@@ -70,11 +74,14 @@ Decimal
 
 >auto
 
-
-\ link field
+\ Set up last and forth-wordlist with the address of the last word's
 UNLOCK tlast @ LOCK 
 1 cells -
-last !
+forth-wordlist !
+[IFDEF] current 
+  forth-wordlist current !
+  >ram unlock tdp @ lock dp !
+[THEN]
 
 include +/gforth/ec/mirror.fs
 
@@ -86,7 +93,7 @@ include +/gforth/ec/mirror.fs
 \ vektor belegen
  ' boot >body init-ip !
 
-\ Set up last and forth-wordlist with the address of the last word's
+
 
  unlock
 .unresolved
