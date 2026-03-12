@@ -14,10 +14,10 @@ label transmit
     \ FIXME: out/sts needs to be reversed
 	temp1 UDR0 out/sts, \ put data (temp1) into buffer sends the data
 	ret,
-label receive-char
+label receive-char-XX
 	temp0 UCSR0A in/lds, 
     temp0 7 sbrs, 
-    receive-char rjmp, 
+    receive-char-XX rjmp, 
     temp1 UDR0 in/lds,
 	ret,
 End-label

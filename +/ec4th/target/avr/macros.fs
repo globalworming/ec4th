@@ -8,26 +8,49 @@ start-macros
 
 \ Aliases
 \ FIXME, needed?
-' r2 alias ZEROL
+' r2 alias zero
 \ FIXME, needed?
-' r3 alias ZEROH
+\ ' r3 alias ZEROH
+\ ' r4 alias read-offset \ read position o
+\ ' r5 alias write-offset \ write position 
 ' r11 alias mempivot
 ' r14 alias temp4
 ' r15 alias temp5
+\ Registers above 16 can be used for cpi
 ' r16 alias temp0
 ' r17 alias temp1
 ' r18 alias temp2
 ' r19 alias temp3
-' r20 alias temp6
-' r21 alias temp7
+\ ' r20 alias temp6
+\ ' r21 alias temp7
+' r20 alias read-offset
+' r21 alias write-offset
 ' r22 alias WL
 ' r23 alias WH
 ' r24 alias TOSL
 ' r25 alias TOSH
+
+\ Indirect load registers allocation
+
+\ TODO: make use of ldx / XL / XH
+\ options:
+\ put W in it
+\ put TOS in it and do @ / c@ with ldx
+
+\ X can read data memory indirectly
 ' XL alias IPL \ r26
 ' XH alias IPH \ r27
+\ Y can read data memory indirectly
+\ YL r28 stack pointer
+\ YH r29 stack pointer
+\ Z can read program memory or data memory 
+\ ZL r30 indirect read/write general purpose
+\ ZH r31 indirect read/write general purpose
+
+\ Stack pointer SPL SPH is memory mapped and not addressable as register
+
 \ FIXME, needed?
-' r12 alias sendZero
+\ ' r12 alias sendZero
 
 
 \ loads the value at address pointed by Y to stack
@@ -92,15 +115,23 @@ ram-start $1ff and $100 <> [IF]
     ZH mempivot cp,
   THEN ;
 
-: addr>pm 
+: addr>pm ( addr -- addr )
 \ translate the dictionary address to device pm address
 \ when its not starting at 0
   rom-start - ;
 
-: addr>data 
+: addr>data ( addr -- addr )
 \ translate the dictionary address to device pm address
 \ when its not starting at 0. SRAM is starting at $100, however
 \ the data area on the AVR starts 0. So we need to keep the $100 offset
   ram-start - $100 + ;
+
+also cross 
+
+: jmp! ( addr addr -- )
+  %1001010000001100 over X ! 
+  swap addr>pm 2/ swap X cell+ X ! ;
+
+previous
 
 end-macros

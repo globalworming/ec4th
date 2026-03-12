@@ -3,8 +3,11 @@ Start-macros
 \ make constants available for assembler
 include avr/constants.fs
 End-macros
+
 include avr/macros.fs
 include avr/vectors328.fs
+
+decimal
 
 Label init-ip    	0 ,
 Label init-ramend return-stack-init addr>data ,
@@ -22,7 +25,7 @@ label xxx2
 	\ FIXME: that should be swapped
 	temp1 UDR0 out/sts, \ put data (temp1) into buffer sends the data
 	ret,
-    here addr>pm 2/ jmp-reset cell+ !
+    here jmp-reset jmp!
 end-label+
 
 include avr/usart-init.fs

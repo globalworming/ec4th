@@ -5,7 +5,9 @@
 
 \ https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf#page=149
 
-label usart-init
+decimal
+
+Label usart-init
     \ set Power Reduction Register / not needed all UART is powered by default
     \ temp1 PRR in/lds,
     \ r16 %11110001 ldi, r16 temp1 and, r16 PRR out/sts,
@@ -54,8 +56,8 @@ label usart-init
     \              Used only in 9-bit character mode
     \ 0    TXB80   Transmit Data Bit 8
     \              Used only in 9-bit character mode
-    \ Enable transmit and receive mode via Usart 0
-    r16 %00011000 ldi, r16 UCSR0B out/sts,
+    \ Enable transmit and receive mode and receive interrupt via Usart 0
+    r16 %10011000 ldi, r16 UCSR0B out/sts,
 
     \ UCSR0C — USART Control and Status Register C
     \ Bit  Name     Function
@@ -97,4 +99,6 @@ label usart-init
     temp0 UBRR0H out/sts,
     lowbyte temp0 swap ldi,
     temp0 UBRR0L out/sts,
+    \ make sure interrupts are enabled in general
+    sei,
 end-label+

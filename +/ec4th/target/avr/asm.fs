@@ -44,9 +44,6 @@ include asm-conf.fs
 : lowbyte ( S: n -- b ; R: -- )
   255 and ;
 
-\ help word that prints the address that is pointet by the targets ap
-: .addr X here CR ." debug Adresse:" . CR ;
-
 \ ~**********???? ??RD DDDD RRRR**************~
 
 : opcode-pattern-??????RDDDDDRRRR ( opc -- )
@@ -650,3 +647,5 @@ flag-sts to test-flag
   THEN ;
 
 previous definitions
+
+." asm fin"

@@ -2,14 +2,17 @@ DECIMAL
 
 Label into-forth
 
+	\ other necessary Initializations
+	zero clr,
+	read-offset clr,
+	write-offset clr,
+	\ sleep mode control register
+	zero smcr out/sts,
+	\ r16 clr, r16 SMCR out/sts,
+
 	temp1 '~ ldi,
 	xxx rcall,
 
-\ other necessary Initializations
-	r16 clr, r16 SMCR out/sts,
-	\ clear ZERO/send Registers
-	ZEROL clr, ZEROH clr,
-	temp1 clr, sendZero clr,
 
 \ Initialization: Instruction Pointer
 	init-ip addr>pm 

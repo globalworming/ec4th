@@ -23,6 +23,7 @@ $8000 $8000 region rom-dictionary
 \ prmitives
 ram-dictionary $80 steal-from-end region return-stack
 ram-dictionary $40 steal-from-end region data-stack
+ram-dictionary $3 steal-from-end region tib-region
 
 setup-target
 
@@ -31,6 +32,7 @@ lock
 
 include +/ec4th/target/atmega328.fs
 include +/ec4th/target/avr/io/uart.fs
+include +/ec4th/target/avr/usart-ringbuffer.fs
 \ include +/ec4th/target/avr/io/dot_s.fs
 include +/ec4th/target/avr/io/emit_key.fs
 

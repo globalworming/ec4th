@@ -31,7 +31,6 @@ HEX
 \ Status Register
   3F constant SREG
 
-
 \ Asynchronous Status Register
   B6 constant ASSR
 
