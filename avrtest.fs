@@ -29,7 +29,7 @@ setup-target
 lock
 
 
-include +/ec4th/target/avr/prim.fs
+include +/ec4th/target/atmega328.fs
 include +/ec4th/target/avr/io/uart.fs
 \ include +/ec4th/target/avr/io/dot_s.fs
 include +/ec4th/target/avr/io/emit_key.fs

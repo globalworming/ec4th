@@ -4,33 +4,21 @@ decimal
 \ ##############################Input / Output##################################
 \ ##############################################################################
 
-\ https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf#page=149
 
-\ Initialization: USART0 for atmega-16+
-label usart0_init
-	\ set Power Reduction Register
-		temp1 PRR in/lds,
-		r16 %11110001 ldi, r16 temp1 and, r16 PRR out/sts,
-	\ set UCSR0A Register
-		r16 %01100000 ldi, r16 UCSR0A out/sts,
-	\ enable transmit and receive mode via Usart 0
-		r16 %00011000 ldi, r16 UCSR0B out/sts,
-	\ set UCSR0C Register Bits 1, 2 (UCSZ00, UCSZ01)
-		r16 %00000110 ldi, r16 UCSR0C out/sts,
-	\ set baud rate
-		r16 clr, r16 UBRR0H out/sts,
-	init-uart @ jmp, usart0_init init-uart !
-end-label
 
 \ temp1 stores the ascii-char that should be transmitted, it's cleared afterwards
 \ temp0 is used too, so make sure to save it before using the transmit function
 label transmit
 	\ temp1 have to be filled with data that should be transmitted
 	temp0 UCSR0A in/lds, temp0 5 sbrs, transmit rjmp, \ wait for empty transmit buffer
+    \ FIXME: out/sts needs to be reversed
 	temp1 UDR0 out/sts, \ put data (temp1) into buffer sends the data
 	ret,
 label receive-char
-	temp0 UCSR0A in/lds, temp0 7 sbrs, receive-char rjmp, temp1 UDR0 in/lds,
+	temp0 UCSR0A in/lds, 
+    temp0 7 sbrs, 
+    receive-char rjmp, 
+    temp1 UDR0 in/lds,
 	ret,
 End-label
 

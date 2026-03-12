@@ -1,5 +1,6 @@
-HEX
+\ constants for AVR io registers
 
+HEX
 
 \ ################################################REGISTERS#####################
 \ Ports
@@ -183,6 +184,5 @@ HEX
 \ Oscillator Calibration Register
   66 constant OSCCAL
 \ ###################################################END########################
-
 
 DECIMAL
