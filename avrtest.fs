@@ -23,7 +23,8 @@ $8000 $8000 region rom-dictionary
 \ prmitives
 ram-dictionary $80 steal-from-end region return-stack
 ram-dictionary $40 steal-from-end region data-stack
-ram-dictionary $3 steal-from-end region tib-region
+\ FIXME: optimise tib
+ram-dictionary $ff steal-from-end region tib-region
 
 setup-target
 

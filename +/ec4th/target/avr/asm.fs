@@ -230,6 +230,7 @@ flag-break to test-flag
 
 : $-check ( src distance opc -- )
   dup
+  \ FIXME: that looks odd
   CASE
     61440 OF brXX-after ENDOF
     61441 OF brXX-after ENDOF
@@ -353,10 +354,11 @@ all-models
   THEN ;
 ' opcode-pattern-???????KKKKK???KKKKKKKKKKKKKKKKK to op-xt
 
+\ FIXME jump
 flag-jmp to test-flag
-	%1001010000001100 op: jmp,
+	%1001010000001100 op: jmp,-XXX-double-check-and-fix-address
 flag-call to test-flag
-	%1001010000001110 op: call,
+	%1001010000001110 op: call,-XXX-double-check-and-fix-address
 
 \ ~**********???? ??KK KKKK KSSS**************~
 

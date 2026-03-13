@@ -8,6 +8,7 @@ dup 0= error" Needs tib-region"
 dup 255 u> error" tib region should be 255 maximum"
 Constant buffer-size \ maximum 255
 Constant buffer-start
+\ send XOFF already when 2 chars are in the buffer.
 2 Constant throttle-threshold
 previous 
 end-macros
@@ -46,19 +47,21 @@ Label uart-rx-isr
 
     \ throttle
     \ compute characters in buffer into temp0
-0 [IF]
+1 [IF]
     clc,
     temp0 write-offset mov,
     temp0 read-offset sbc,
     1 $ brcc,
     clc,
     temp0 0 buffer-size - $ff and subi,
-    \ send XOFF if at threshold
+    \ send XOFF once if at threshold
     1 $:
     temp0 throttle-threshold cpi,
     2 $ brne,
     temp1 $13 ldi,
-    transmit call,
+    \ temp1 '^ ldi,
+    temp1 UDR0 out/sts, 
+    \ transmit rcall,
     2 $:
 [THEN]
 
@@ -93,15 +96,16 @@ label receive-char
     read-offset clr,
     1 $:
 
+    sei,
+
     \ send XON, if transmit register is not empty wait, to make sure the 
-0 [IF]
     read-offset write-offset cp,
     2 $ brne,
+    temp1 push,
     temp1 $11 ldi,
-    transmit call,
+    transmit rcall,
+    temp1 pop,
     2 $:
-[THEN]
 
-    sei,
     ret,
 End-label+
