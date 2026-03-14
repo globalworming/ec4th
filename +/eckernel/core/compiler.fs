@@ -1,6 +1,7 @@
+\ 
 
+\ Stripped down compiler extracted from GForth around 2008.
 
-\ Stripped down compiler based on what we had in GForth around 2008.
 \ Not 100% standards compatible: IS does not have different compile 
 \ and interpretation semantics, use [IS] 
 
@@ -12,6 +13,10 @@
 
 \ the pointer to the current dictionary pointer
 Variable dp	
+
+Variable current
+Variable last
+Variable lastcfa
 
 : here dp @ ;
 
@@ -165,13 +170,9 @@ Variable dp
 \G exception stack.
     postpone (abort") ," ;        immediate restrict
 
-Variable current
-Variable last
-Variable lastxt
-
 : recurse ( compilation -- ; run-time ?? -- ?? ) \ core
     \g Call the current definition.
-    lastxt @ , ; immediate restrict
+    lastcfa @ , ; immediate restrict
 
 \ \ Header states						23feb93py
 
@@ -212,9 +213,12 @@ Variable lastxt
 \G expects 0 to check for imablanced conditionals
     abort" unstructured " ;
 
+: cfa,
+    align here lastcfa ! ,  0 , ;
+
 : colon-cf, ( -- colon-sys )
     \ common factor of : and :noname
-    align here lastxt ! lit :docol , 0 , defstart ] ;
+     lit :docol cfa, defstart ] ;
 
 : : ( "name" -- colon-sys ) \ core	colon
     Header colon-cf, ;
@@ -245,3 +249,57 @@ Variable lastxt
 
 : ; ?struc reveal postpone ;s postpone [ ; immediate restrict
 
+\ field support needs to go somewhere else
+
+\ doer? :dofield [IF]
+\     : (Field)  Header reveal dofield: cfa, ;
+\ [ELSE]
+\     : (Field)  Create DOES> @ + ;
+\ [THEN]
+
+\ \ Create Variable User Constant                        	17mar93py
+
+doer? :dovar [IF]
+
+: Create ( "name" -- ) \ core
+    Header reveal lit :dovar cfa, ;
+[ELSE]
+
+: Create ( "name" -- ) \ core
+    Header reveal 0 cfa, DOES> ;
+[THEN]
+
+: Variable ( "name" -- ) \ core
+    Create 0 , ;
+
+: 2Variable ( "name" -- ) \ double two-variable
+    create 0 , 0 , ;
+
+doer? :docon [IF]
+    : (Constant)  Header reveal :docon cfa, ;
+[ELSE]
+    : (Constant)  Create DOES> @ ;
+[THEN]
+
+: Constant ( w "name" -- ) \ core
+    \G Define a constant @i{name} with value @i{w}.
+    \G  
+    \G @i{name} execution: @i{-- w}
+    (Constant) , ;
+
+
+: Value ( w "name" -- ) \ core-ext
+    (Constant) , ;
+
+\ TODO move to double?
+
+: 2,	( w1 w2 -- ) \ gforth
+\G Reserve data space for two cells and store the double @i{w1
+\G w2} there, @i{w2} first (lower address).
+    here 2 cells allot 2! ;
+
+: 2Constant ( w1 w2 "name" -- ) \ double two-constant
+    Create ( w1 w2 "name" -- )
+        2,
+    DOES> ( -- w1 w2 )
+        2@ ;

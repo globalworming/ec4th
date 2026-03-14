@@ -1,5 +1,7 @@
 \ +/eckernel/double/arithmetics.fs
 
+asdfasdf
+
 UNDEF-WORDS
 decimal
 

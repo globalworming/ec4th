@@ -60,6 +60,4 @@ Variable state
 \ : at-xy  
 \   1+ swap 1+ swap ESC[ pn ;pn 72 emit ;
 
-
-
 : bell  #bell emit [ has? os [IF] ] outfile-id flush-file drop [ [THEN] ] ;

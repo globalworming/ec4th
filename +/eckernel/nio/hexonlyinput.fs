@@ -14,9 +14,6 @@ have to be prefixed by the h# word.
 Compatibility:
 Open Boot: No negative numbers, no compilation
 
-Status: 
-Works
-
 [THEN]
 
 has? compiler
@@ -30,7 +27,6 @@ decimal
 : h# ( -- u )
 \G minimalistic parsing of a hex number
 \G no error checking is done
-\ test condition: works!
   parse-word bounds swap >r >r 0
   BEGIN r@ I' xor
   WHILE d# 4 lshift
