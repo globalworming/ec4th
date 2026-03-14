@@ -50,16 +50,16 @@ UNDEF-WORDS
 : ?dup ( w -- w )
 	dup IF dup THEN ;
 
-: r@ rp@ cell+ @ ;
+: r@ rp@ 2 cells + @ ;
 
 ' r@ Alias i
 
-: i' rp@ 2 cells + @ ;
+: i' rp@ 3 cells + @ ;
 
-: j rp@ 3 cells + @ ;
+: j rp@ 4 cells + @ ;
 
 \ TODO needed?
-: k rp@ 5 cells + @ ;
+: k rp@ 6 cells + @ ;
 
 \ Alternatives: 
 \ : r@ r> r> swap over >r >r ;
@@ -106,5 +106,11 @@ UNDEF-WORDS
 
 : 2tuck ( w1 w2 w3 w4 -- w3 w4 w1 w2 w3 w4 )
 	2swap 2over ;
+
+\ roll                                           17may93jaw
+
+: roll  ( x0 x1 .. xn n -- x1 .. xn x0 ) \ core-ext
+  dup 1+ pick >r
+  cells sp@ cell+ dup cell+ rot move drop r> ;
 
 ALL-WORDS
