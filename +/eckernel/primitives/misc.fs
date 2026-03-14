@@ -89,47 +89,11 @@ Create rot-values
 \			REPEAT
 \			THEN nip - ;
 
-: aligned ( c_addr -- a_addr )
-	[ cell 1- ] Literal + [ -1 cells ] Literal and ;
-
-: faligned ( c_addr -- f_addr )
-	[ 1 floats 1- ] Literal + [ -1 floats ] Literal and ;
-
-: >body ( xt -- a_addr )
-	2 cells + ;
-
-: >code-address ( xt -- c_addr )
-	@ ;
-
-: >does-code ( xt -- a_addr )
-	cell+ @ ;
-
-: code-address! ( c_addr xt -- )
-	! ;
-
-\ : does-code! ( a_addr xt -- )
-\	dodoes: over ! cell+ ! ;
-
-: does-handler! ( a_addr -- )
-	drop ;
-
-: /does-handler ( -- n )
-	2 cells ;
-
-: threading-method ( -- n )
-	1 ;
 
 
-AVariable UP
-
-has? OS [IF] [THEN]
-: up! ( a_addr -- )
-	up ! ;
 
 \ ###################
 
-: on true swap ! ;
-: off false swap ! ;
 
 : pad    ( -- c-addr ) \ core-ext
 \ c-addr is the address of a region that can be used as temp data

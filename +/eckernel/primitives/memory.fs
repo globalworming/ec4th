@@ -1,14 +1,14 @@
 
 require +/eckernel/compat/undef-words.fs
 
-require stackmanipulation.fs
-
 UNDEF-WORDS
 decimal
 
 \ assume one byte chars for ec all the time
 ' 1+ Alias char+ ( c_addr1 -- c_addr2 )
+
 : noop ;
+
 ' noop Alias chars ( c_addr1 -- c_addr2 )
 
 [IFUNDEF] cell
@@ -42,11 +42,6 @@ defined? cells 0= cell 2 = and [IF]
 : aligned ( c_addr -- a_addr ) \ core 
     [ cell 1- ] Literal + [ -1 cells ] Literal and ;
 
-\ FIXME: move to nio
-\ read value from variable and prints
-\ : ?  ( addr -- )
-\   @ . ;
-
 : bounds ( addr u -- addr+u addr )
 	over + swap ;
 
@@ -73,7 +68,6 @@ defined? cells 0= cell 2 = and [IF]
 \ fetches two values from a_addr.
 : 2@ ( a_addr -- w1 w2 )
 	dup cell+ @ swap @ ;
-
 
 : +! ( n a_addr -- )
 	tuck @ + swap ! ;

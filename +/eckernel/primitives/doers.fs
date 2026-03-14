@@ -22,7 +22,11 @@ doer? :dovalue 0= [IF]
 
 \ TODO add rom defer support
 doer? :dodefer 0= [IF]
+has? rom-defer [IF]
+| : Defer ( "name" -- )  DOES> @ @ execute ;
+[ELSE]
 | : Defer ( "name" -- ) DOES> @ execute ;
+[THEN]
 [THEN]
 
 \ | : 2Constant ( w1 w2 "name" -- ) 
