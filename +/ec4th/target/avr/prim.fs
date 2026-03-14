@@ -268,6 +268,27 @@ Code + ( S: n1 n2--n3 ; R: -- )
 	do_next rjmp,
 End-Code+
 
+Code 2+ ( S: n1--n2 ; R: -- )
+	\ adds the size of one cell to n1
+	\ cell+ will be aliased to 2+
+	tosl 2 adiw,
+	do_next rjmp,
+End-Code+
+
+Code 1+ ( S: n1--n2 ; R: -- )
+	\ add one to tos, also used for char+
+	tosl 1 adiw,
+	do_next rjmp,
+End-Code+
+
+Code 1- ( S: n1--n2 ; R: -- )
+	\ subctract 1
+Label rp@adjust
+	tosl 1 subi,
+	tosh zero sbc,
+	do_next rjmp,
+End-Code+
+
 Code 2/ ( S: n1--n2 ; R: -- )
 	\ devides n1 by 2
 	tosh asr, tosl ror,
@@ -279,8 +300,6 @@ Code 2* ( S: n1--n2 ; R: -- )
 	tosl lsl, tosh rol,
 	do_next rjmp,
 End-Code+
-
-
 
 \ ##############################################################################
 \ ##############################Return Stack####################################
@@ -302,6 +321,8 @@ End-Code+
 
 Code r@ ( S: --n ; R: n--n )
 	\ duplicates one item from return stack to TOS
+	\ I will be aliased to r@
+	\ TODO: better use ldx?
 	savetos
 	tosl pop, tosh pop,
 	tosh push, tosl push,
@@ -312,7 +333,9 @@ Code rp@ ( S: --addr ; R: -- )
 	savetos
 	tosl SPL in/lds,
 	tosh SPH in/lds,
-	do_next rjmp,
+	\ align so : r@ rp@ cell+ @ ;
+	\ the actual pointer is always off by 1, since we write bytes not cells
+	rp@adjust rjmp,
 End-Code+
 
 \ ##############################################################################
@@ -365,12 +388,6 @@ Code c! ( S: c addr-- ; R: -- )
 	loadtos
 	tosl stZ,
 	loadtos
-	do_next rjmp,
-End-Code+
-
-Code cell+ ( S: n1--n2 ; R: -- )
-	\ adds the size of one cell to n1
-	tosl 2 adiw,
 	do_next rjmp,
 End-Code+
 

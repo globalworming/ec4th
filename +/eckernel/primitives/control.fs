@@ -121,27 +121,6 @@ decimal
 		cell+
 	THEN >r ;
 
-variable itmp
-
-
-: i' ( -- w )
-\ rp@ cell+ cell+ @ ;
-	r> r> r> dup itmp ! >r >r >r itmp @ ;
-
-
-: I r> r> swap over >r >r ;
-
-: j ( -- n ) \ rp@ cell+ cell+ cell+ @ ;
-	r> r> r> r> dup itmp ! >r >r >r >r itmp @ ;
-
-[IFUNDEF] itmp variable itmp [THEN]
-
-: k ( -- n ) \ rp@ [ 5 cells ] Literal + @ ;
-	r> r> r> r> r> r> dup itmp !
-	>r >r >r >r >r >r itmp @ ;
-
-[IFUNDEF] itmp variable itmp [THEN]
-
 \ : perform ( a_addr -- )
 \ 	@ execute ;
 

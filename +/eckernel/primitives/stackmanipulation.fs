@@ -8,20 +8,35 @@ UNDEF-WORDS
 : drop ( w -- )
 	IF THEN ;
 
-: dup ( w -- w w )
-	sp@ @ ;
-
 [IFUNDEF] swap
-Variable swap-tmp
+| Variable swap-tmp
 : swap ( w1 w2 -- w2 w1 )
 	>r swap-tmp ! r> swap-tmp @ ;
 [THEN]
 
+: dup ( w -- w w )
+	sp@ @ ;
+
 : over ( w1 w2 -- w1 w2 w1 )
 	sp@ cell+ @ ;
 
+: pick ( u -- w )
+	1+ cells sp@ + @ ;
+
+1 cells 2 = [IF]
+| ' 2/ Alias cell/
+[ELSE]
+: cell/ cell / ;
+[THEN]
+
+: depth ( -- +n ) \ core 
+    sp@ sp0 @ swap - cell/ ;
+
 : rot ( w1 w2 w3 -- w2 w3 w1 )
 	>r swap r> swap ;
+
+: 2drop ( w w -- )
+    drop drop ;
 
 : -rot ( w1 w2 w3 -- w3 w1 w2 )
 	rot rot ;
@@ -35,13 +50,31 @@ Variable swap-tmp
 : ?dup ( w -- w )
 	dup IF dup THEN ;
 
-: pick ( u -- w )
-	1+ cells sp@ + @ ;
+: r@ rp@ cell+ @ ;
+
+' r@ Alias i
+
+: i' rp@ 2 cells + @ ;
+
+: j rp@ 3 cells + @ ;
+
+\ TODO needed?
+: k rp@ 5 cells + @ ;
+
+\ Alternatives: 
+\ : r@ r> r> swap over >r >r ;
+\ : i' ( -- w ) 
+\    r> r> r> dup itmp ! >r >r >r itmp @ ;
+\ : j ( -- n ) \ rp@ cell+ cell+ cell+ @ ;
+\ 	r> r> r> r> dup itmp ! >r >r >r >r itmp @ ;
+\ : k ( -- n ) \ rp@ [ 5 cells ] Literal + @ ;
+\	r> r> r> r> r> r> dup itmp !
+\	>r >r >r >r >r >r itmp @ ;
 
 : rdrop ( -- )
 	r> r> drop >r ;
 
-\ TODO remove the double words from here
+\ TODO remove the double words from here?
 
 : 2>r ( w1 w2 -- )
 	swap r> swap >r swap >r >r ;
@@ -54,6 +87,7 @@ Variable swap-tmp
 
 : 2rdrop ( -- )
 	r> r> drop r> drop >r ;
+
 
 : 2dup ( w1 w2 -- w1 w2 w1 w2 )
 	over over ;

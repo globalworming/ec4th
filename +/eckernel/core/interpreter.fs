@@ -242,7 +242,8 @@ require parse-word.fs
 \G the text interpreter.
     \ don't reset sp. user might have a typo
     \ [ unlock data-stack borders nip lock ] literal sp!
-    [ unlock return-stack borders nip lock ] literal rp!
+    \ rp by convention points
+    [ unlock return-stack borders nip lock cell - ] literal rp!
     handler off [ defined? state [IF] ] state off [ [THEN] ]
     \ exits only through THROW etc.
     BEGIN

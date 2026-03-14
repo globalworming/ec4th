@@ -12,17 +12,18 @@
   2/ dup 0> IF 
     0 DO drop LOOP
   ELSE
+    drop
     \ going downwards should not happen
-    \ however, we can keep the contents intact via sp@
-    \ FIXME needs testig
-    0 ?DO sp@ @ LOOP
-  THEN ;
+    \ however, we dould keep the contents intact via sp@
+    \ 0 ?DO sp@ cell+ / cell- @ LOOP
+  THEN
+  ;
 [THEN]
 
 [IFUNDEF] rp!
 : rp! ( addr -- )
 \G Reset return stack, expects that its always reduced
-  r> swap BEGIN dup rp@ <> WHILE rdrop REPEAT drop >r ;
+  r> swap BEGIN dup rp@ u> WHILE rdrop REPEAT drop >r ;
 [THEN]
 
 User "error

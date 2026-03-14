@@ -47,11 +47,7 @@ start-macros
 \ ZL r30 indirect read/write general purpose
 \ ZH r31 indirect read/write general purpose
 
-\ Stack pointer SPL SPH is memory mapped and not addressable as register
-
-\ FIXME, needed?
-\ ' r12 alias sendZero
-
+\ SPL SPH  (stack pointer) is memory mapped and not addressable as register
 
 \ loads the value at address pointed by Y to stack
 : loadtos
@@ -60,15 +56,6 @@ start-macros
 \ saves the value of stack to the address pointed by Y
 : savetos
   tosh st-Y, tosl st-Y, ;
-
-\ reads addr and jumps to it indirectly
-\ FIXME: remove
-: jumpOverByAddressREMOVE ( addr -- )
-  ZL over lowbyte ldi, ZH swap highbyte ldi,
-	temp0 lpmz+, temp1 lpmz,
-	ZL temp0 movw,
-	ZH lsr, ZL ror,
-	ijmp, ;
 
 : end-code+
   savebranch0 end-code ;
@@ -79,7 +66,7 @@ start-macros
 also cross 
 dictionary extent drop Constant rom-start
 ram-dictionary extent drop Constant ram-start
-return-stack borders nip Constant return-stack-init
+return-stack borders nip 1- Constant return-stack-init
 data-stack borders nip Constant data-stack-init
 previous 
 

@@ -15,7 +15,7 @@ $c100 $07ff region ram-dictionary
 $0000 $ffff region rom-dictionary
 [ELSE]
 \ FIXME: why 7ff?
-$0100 $07ff region ram-dictionary
+$0100 $0800 region ram-dictionary
 $8000 $8000 region rom-dictionary
 [THEN]
 

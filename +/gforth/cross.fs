@@ -1326,10 +1326,6 @@ Variable mirrored-link          \ linked list for mirrored regions
 	>body (region)
   THEN ;
 
-: borders ( region -- startaddr endaddr ) 
-\G returns lower and upper region border
-  dup >rstart @ swap >rlen @ over + ;
-
 : extent  ( region -- startaddr len )   
 \G returns the really used area
   dup >rstart @ swap >rdp @ over - ;
@@ -1337,6 +1333,10 @@ Variable mirrored-link          \ linked list for mirrored regions
 : area ( region -- startaddr totallen ) 
 \G returns the total area
   dup >rstart @ swap >rlen @ ;
+
+: borders ( region -- startaddr endaddr ) 
+\G returns lower and upper region border, the end address is exclusive
+  area over + ;
 
 : steal-from-end ( region len -- startadr len)
 \G shrink region at the end and return start and len of the
