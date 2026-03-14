@@ -109,9 +109,13 @@ Code: :docon
 	savetos
 	ZL WL movw,
 	ZL 4 adiw,
-	\ FIXME ram/rom unterscheidung
+	?rom-address-cp,
+	0 $ brcc,
 	zh-mask-rom-address,
 	tosl lpmZ+, tosh lpmZ+,
+	do_next rjmp,
+	0 $:
+	tosl ldZ+, tosh ldZ+,
 	do_next rjmp,
 End-Code+
 

@@ -80,6 +80,10 @@ require catch-throw.fs
 
 decimal
 User base 10 base !
+
+: decimal 10 base ! ;
+: hex 16 base ! ;
+
 User dpl
 
 decimal

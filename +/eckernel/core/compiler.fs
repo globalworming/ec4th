@@ -276,20 +276,10 @@ doer? :dovar [IF]
     create 0 , 0 , ;
 
 doer? :docon [IF]
-    : (Constant)  Header reveal :docon cfa, ;
+    : Constant  Header reveal lit :docon cfa, , ;
 [ELSE]
-    : (Constant)  Create DOES> @ ;
+    : Constant  Create DOES> @ ;
 [THEN]
-
-: Constant ( w "name" -- ) \ core
-    \G Define a constant @i{name} with value @i{w}.
-    \G  
-    \G @i{name} execution: @i{-- w}
-    (Constant) , ;
-
-
-: Value ( w "name" -- ) \ core-ext
-    (Constant) , ;
 
 \ TODO move to double?
 
