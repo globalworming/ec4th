@@ -7,12 +7,8 @@ start-macros
 \ include constants.fs
 
 \ Aliases
-\ FIXME, needed?
 ' r2 alias zero
-\ FIXME, needed?
-\ ' r3 alias ZEROH
-\ ' r4 alias read-offset \ read position o
-\ ' r5 alias write-offset \ write position 
+
 ' r11 alias mempivot
 ' r14 alias temp4
 ' r15 alias temp5
@@ -21,8 +17,6 @@ start-macros
 ' r17 alias temp1
 ' r18 alias temp2
 ' r19 alias temp3
-\ ' r20 alias temp6
-\ ' r21 alias temp7
 ' r20 alias read-offset
 ' r21 alias write-offset
 ' r22 alias WL
