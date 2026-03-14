@@ -1,7 +1,20 @@
 DECIMAL
 
 Label into-forth
+	3 $ rjmp,
 
+\ FIXME not used yet
+Label on-error
+	\ init data stack again, expect error code in tos
+	init-dataStack addr>pm
+	ZH over highbyte ldi, ZL swap lowbyte ldi,
+	YL lpmz+, YH lpmz,
+	\ init instruction pointer
+	error-ip addr>pm 
+	ZL over lowbyte ldi, ZH swap highbyte ldi,
+	IPL lpmz+, IPH lpmz,
+	4 $ rjmp,
+3 $:
 	\ other necessary Initializations
 	zero clr,
 	read-offset clr,
@@ -13,31 +26,29 @@ Label into-forth
 	temp1 '~ ldi,
 	xxx rcall,
 
-
-\ Initialization: Instruction Pointer
+	\ init instruction pointer
 	init-ip addr>pm 
 	ZL over lowbyte ldi, ZH swap highbyte ldi,
 	IPL lpmz+, IPH lpmz,
-\ Initialization: Return Stack
-	init-ramend addr>pm
-	ZL over lowbyte ldi, ZH swap highbyte ldi,
-	temp0 lpmz+, temp0 SPL out/sts,
-	temp0 lpmz, temp0 SPH out/sts,
-	temp0 clr,
-\ Initialization: Data Stack
-	init-dataStack addr>pm
-	ZH over highbyte ldi, ZL swap lowbyte ldi,
-	YL lpmz+, YH lpmz,
-	YL 2 adiw,
+
 \ Initialization: Rom Start
 \ FIXME from region
 \    temp0 $80 ldi,
 \	mempivot temp0 mov,
 	mempivot-init,
 
-\ include of blink program at start
-\	include blink.fs
+	\ init data stack
+	init-dataStack addr>pm
+	ZH over highbyte ldi, ZL swap lowbyte ldi,
+	YL lpmz+, YH lpmz,
+	YL 2 adiw,
 
+4 $:
+	\ init return stack
+	init-ramend addr>pm
+	ZL over lowbyte ldi, ZH swap highbyte ldi,
+	temp0 lpmz+, temp0 SPL out/sts,
+	temp0 lpmz, temp0 SPH out/sts,
 
 Label do_next
 \	temp1 '. ldi,
@@ -72,8 +83,8 @@ Label do_next2
 end-label+
 
 Code: :docol
-	\ start a colon defined forth-word
-	IPH push, IPL push, \ push IP
+\ start a colon defined forth word
+	IPH push, IPL push,
 	IPL WL movw,
 	IPL 4 adiw, 
 	do_next rjmp,
@@ -122,7 +133,6 @@ Code: :dodoes
 	do_next rjmp,
 End-Code+
 
-\ FIXME: test
 Code execute
 \ executes forth-word thats address is on the tos
 	WL tosl movw,
@@ -172,7 +182,8 @@ label skip_next
 	do_next rjmp,
 end-code+
 
-code (loop)
+\ FIXME do loop
+code (loop)-xxx
 	temp0 pop, temp1 pop, \ index
 	temp4 pop, temp5 pop, \ limit
 	temp2 1 ldi, temp3 clr,
@@ -186,13 +197,15 @@ code (loop)
 	skip_next rjmp,
 end-code+
 
-code unloop
+\ FIXME do loop
+code unloop-xxx
 	temp0 pop, temp1 pop,
 	temp4 pop, temp5 pop,
 	do_next rjmp,
 end-code+
 
-code (do)
+\ FIXME do loop
+code (do)-xxx
 	temp0 tosl movw, \ index
 	loadtos
 	tosh push, tosl push, \ limit
@@ -204,10 +217,6 @@ end-code+
 \ ##############################################################################
 \ ##############################Stack manipulation##############################
 \ ##############################################################################
-
-\ Code here \ FIXME: Wird in High Forth gemacht
-\ 	do_next rjmp,
-\ End-Code+
 
 Code swap ( S: n1 n2--n2 n1 R: -- )
 	\ swap the last two stack items

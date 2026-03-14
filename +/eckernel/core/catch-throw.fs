@@ -2,10 +2,9 @@
 
 \ sp! and rp! replacements                     8mar26jw
 
-\ NEEDS MORE TESTING!!!
+\ FIXME: move to primitives?
 
 [IFUNDEF] sp!
-
 : sp! ( addr -- )
 \G Reset stack pointer to the given address.
   sp@ cell+ - 

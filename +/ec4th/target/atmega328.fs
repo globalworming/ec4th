@@ -8,8 +8,8 @@ include avr/macros.fs
 include avr/vectors328.fs
 
 decimal
-
 Label init-ip    	0 ,
+Label error-ip		0 ,
 Label init-ramend return-stack-init addr>data ,
 Label init-dataStack data-stack-init addr>data ,
 
