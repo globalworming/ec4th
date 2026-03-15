@@ -1,6 +1,7 @@
+- interpretation semantics of s" and ."
 - have 0 as word and possible primitive, alias to s>d
 - abort" does not take flag, have ?abort", https://forth-standard.org/standard/exception/ABORTq
-- detect when dictionary is full
+- detect when dictionary is full, see pad
 - detect stack overflow and underflow
 - DOES>
 - Make no header flag work, use Alias instead of defer

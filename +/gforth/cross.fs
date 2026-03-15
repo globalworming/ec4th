@@ -1791,12 +1791,17 @@ Ghost state drop
 \ X has? rom [IF] $60 [ELSE] $00 [THEN] Constant header-masks
 0 Constant header-masks
 
+: lwc ( c1 -- c2 )
+    dup [char] A [ char Z 1+ ] literal within [ char a char A - ] literal and + ;
+
 : ht-header,  ( addr count -- )
   dup there swap last-string 2!
-    dup header-masks or T c, H bounds  ?DO  I c@ T c, H  LOOP ;
+    dup header-masks or T c, H bounds  ?DO  I c@ lwc T c, H  LOOP ;
+
 : ht-string,  ( addr count -- )
   dup there swap last-string 2!
     dup T c, H bounds  ?DO  I c@ T c, H  LOOP ;
+
 : ht-mem, ( addr count )
     bounds ?DO  I c@  T c, H  LOOP ;
 

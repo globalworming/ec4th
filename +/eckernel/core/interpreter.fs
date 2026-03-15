@@ -39,10 +39,58 @@ decimal
 \G Convert ASCII c1 to uppercase. Input values from ASCII a-z are converted to A-Z,
 \G all other values are unchanged
 \G Needed for dictionary search and number conversion
-    dup [ char z 1+ char a 1- ] literal literal within
-    IF  [ char a char A - ] literal - THEN ;
+    dup [char] a [ char z 1+ ] literal within [ char a char A - ] literal and - ;
 
-\ TODO: change words to lower case and skip char conversion for stored word
+: lwc ( c1 -- c2 )
+\G Convert ASCII c1 to uppercase. Input values from ASCII a-z are converted to A-Z,
+\G all other values are unchanged
+\G Needed for dictionary search and number conversion
+    dup [char] A [ char Z 1+ ] literal within [ char a char A - ] literal and + ;
+
+: comparedict ( adr1 len1 adr2 len2 -- flag )
+  rot over <> IF 2drop drop false EXIT THEN
+  ( adr1 adr2 len )
+  bounds ?DO dup c@ I c@ <> 
+             IF drop UNLOOP false EXIT THEN 
+  char+ LOOP
+  drop true ;
+
+bigendian 0= 1 cells 2 = and [IF]
+
+\ optimised dictionary traversal for search. asuming:
+\
+\ - little endian
+\ - 16 bit
+\ - words in dictionary are lower case
+
+: (compare) ( adr1 adr2 len -- flag )
+  bounds ?DO dup c@ I c@ <> 
+             IF drop UNLOOP false EXIT THEN 
+  char+ LOOP
+  drop true ;
+
+: tolower ( c-addr1 len -- c-addr2 len )
+\ convert search string to lower case  once and put it to here
+    tuck here dup >r -rot bounds DO I c@ lwc over c! char+ LOOP drop r> swap ;
+
+\ This implementation keeps a 16 bit value on the return stack with the containing
+\ the length and the first character. Cuts traversal time approximately in half.
+: find-name-in ( adr len lfa -- nfa | 0 )
+  -rot 
+  tolower
+  \ compute word with char and length
+  over c@ 8<< over or >r 
+  rot
+  BEGIN @ dup WHILE cell+ dup @ $ff1f and r@ = IF
+            >r 2dup r@ char+ swap (compare)
+            IF 2drop r> rdrop EXIT THEN r>
+        THEN cell -
+  REPEAT rdrop nip nip ;
+
+[ELSE]
+
+\ Slow variant should work on any architecture
+
 : comparedict ( adr1 len1 adr2 len2 -- flag )
   rot over <> IF 2drop drop false EXIT THEN
   ( adr1 adr2 len )
@@ -53,9 +101,11 @@ decimal
 
 : find-name-in ( adr len lfa -- nfa | 0 )
 \G Forth 2012 suggestion, https://forth-standard.org/proposals/find-name#contribution-58
-  BEGIN @ dup WHILE >r 2dup r@ cell+ name>string comparedict
+  BEGIN @ dup WHILE >r 2dup r@ cell+ name>string comparedict-ignore-case
         IF 2drop r> cell+ EXIT THEN r>
   REPEAT nip nip ;
+[THEN]
+
 
 [IFUNDEF] find-name
 \G points to the last defined word

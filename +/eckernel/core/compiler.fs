@@ -276,7 +276,7 @@ doer? :dovar [IF]
     create 0 , 0 , ;
 
 doer? :docon [IF]
-    : Constant  Header reveal lit :docon cfa, , ;
+    : Constant  Header reveal lit :docon cfa, ,;
 [ELSE]
     : Constant  Create DOES> @ ;
 [THEN]

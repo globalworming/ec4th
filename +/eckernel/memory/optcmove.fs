@@ -17,7 +17,7 @@
   IF drop -rot (cmove) EXIT THEN
   ?dup 
   IF    \ okay we have an unaligned beginning
-        \ copy this pease with normal (cmove)
+        \ copy this peace with normal (cmove)
         ( c_to u c_from u2 )
         [ 1 cells ] Literal swap -
         >r -rot r> tuck - >r >r 2dup r> (cmove) r>
