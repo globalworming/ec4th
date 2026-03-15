@@ -218,7 +218,7 @@ const Create bases   10 ,   2 ,   A , 100 ,
 require tib.fs
 require parse-word.fs
 
-: interpret ( ?? -- ?? ) \ gforth
+: (interpret) ( ?? -- ?? ) \ gforth
 \ interpret/compile the (rest of the) input buffer
     BEGIN ?stack parse-word dup 
     WHILE  
@@ -228,6 +228,20 @@ require parse-word.fs
                     interpreter
         [ [THEN] ]
     REPEAT 2drop ;  
+
+2Variable start-time
+
+: .elapsed ( d -- ) 
+    '~ emit
+    1000 um/mod nip s>d
+    base @ >r 10 base ! <# #s #> type r> base !
+    ." ms " ;
+
+\ FIXME experimental / move
+: interpret 
+    dmicros start-time 2!
+    (interpret)
+    dmicros start-time 2@ d- .elapsed ;
 
 : refill ( -- flag ) \ core-ext,block-ext,file-ext
 \G refill the input buffer

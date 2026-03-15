@@ -67,6 +67,6 @@ DECIMAL
 : .sh
   depth
   dup [char] < emit false (.h) [char] > emit space dup
-  0 ?DO dup pick .h 1- LOOP cr drop ;
+  0 ?DO dup pick .h 1- LOOP drop ;
 
 \ : n.x ( n -- ) 0 do .x loop ;

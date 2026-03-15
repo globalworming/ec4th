@@ -33,3 +33,9 @@
 \G Only uses stack for the output and does not rely on available dictionary space
 \G as pictured numeric output would do.
     base @ .x ;
+
+: .s
+\G print the content of the stack
+  depth
+  dup [char] < emit base @ u.x [char] > emit space dup
+  0 ?DO dup pick . 1- LOOP drop ;

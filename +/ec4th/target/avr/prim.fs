@@ -432,16 +432,16 @@ End-Code+
 Code dmicros ( S: -- ud )
 	savetos
 	cli,
-	tosh ticks2 mov,
-	tosl ticks1 mov,
-	temp1 ticks0 mov,
-	temp0 TCNT0 in/lds,
+	temp1 ticks2 mov,
+	temp0 ticks1 mov,
+	tosh ticks0 mov,
+	tosl TCNT0 in/lds,
+	sei,
 	\ *4 since we get 4 microseonds ticks
-	temp0 lsl, temp1 rol, tosl rol, tosh rol,
-	temp0 lsl, temp1 rol, tosl rol, tosh rol,
+	tosl lsl, tosh rol, temp0 rol, temp1 rol,
+	tosl lsl, tosh rol, temp0 rol, temp1 rol,
 	savetos
 	tosl temp0 movw,
-	sei,
 	do_next rjmp,
 End-Code+
 
