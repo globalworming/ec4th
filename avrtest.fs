@@ -50,7 +50,8 @@ include +/eckernel/debug/dump.fs
 include +/eckernel/core/compiler.fs
 include +/eckernel/core/interpreter.fs
 include +/eckernel/core/flow-control.fs
-
+include +/eckernel/core/numeric-output.fs
+include +/eckernel/core/picture-numeric-output.fs
 
 include +/eckernel/primitives/doers.fs
 

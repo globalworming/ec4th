@@ -19,6 +19,6 @@ decimal
 
 
 : count ( c_addr1 -- c_addr u ) \ core
-    dup 1+ swap c@ ;
+    dup char+ swap c@ ;
 
 ALL-WORDS 

@@ -6,7 +6,30 @@ decimal
 
 \ TODO: put some more replacements for or, - and 2*
 
-\ ###Shifts###
+\ adds one to the TOS
+: 1+ ( S: n1--n2 ; R: -- )
+	1 + ;
+
+\ substracts one from the TOS
+: 1- ( S: n1--n2 ; R: -- )
+	1 - ;
+
+: 2+ ( S: n1--n2 ; R: -- )
+\G Add 2 to TOS. Non standard word but embedded 16 bit systems
+\G can be expected to have this since its the same as cell+
+\G this should be implemented as primitive, aliased to cell+
+	2 + ;
+
+: 2* ( n1 - n2 ) \ core
+\G Should be implemented as primitive since also used for cells
+    dup + ;
+
+: 2/  ( n1 -- n2 ) \ core
+    dup min-n and IF 1 ELSE 0 THEN
+    [ bits/byte cell * 1- ] literal 
+    0 DO 2* swap dup 2* >r min-n and 
+      IF 1 ELSE 0 THEN or r> swap
+    LOOP nip ;
 
 \ shifts u1 n times to right. Effectivly it is deviding u1 n times by 2
 : rshift ( S: u1 n--u2 ; R: -- )
@@ -30,19 +53,6 @@ decimal
 : abs ( S: n--u ; R: -- )
 	dup 0< IF negate THEN ;
 
-\ ###Arithmetics +-*/###
-
-\ adds one to the TOS
-: 1+ ( S: n1--n2 ; R: -- )
-	1 + ;
-
-\ substracts one from the TOS
-: 1- ( S: n1--n2 ; R: -- )
-	1 - ;
-
-\ add two to TOS, this is also aliased to cell+ and common address artihmentic
-: 2+ ( S: n1--n2 ; R: -- )
-	2 + ;
 
 \ multiplies n1 with n2
 : * ( n1 n2 -- n3 )

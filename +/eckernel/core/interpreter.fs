@@ -238,7 +238,7 @@ require parse-word.fs
 \ target for throw if no catch handler is defined
 \ we don't use catch in quit, so the stack contents keep
 \ intact when user has a typo ;jw
-      ." error: " .x quit ;
+      .error quit ;
 
 : quit ( -- ) \ CORE
 \G Empty the return stack, make the user input device

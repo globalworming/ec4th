@@ -24,23 +24,11 @@ decimal
 : mod ( n1 n2 -- n3 ) \ core
     /mod swap drop ;
 
-: 1+ ( S: n1--n2 ; R: -- ) \ core
-    1 + ;
 
-: 1- ( S: n1--n2 ; R: -- ) \  core
-    1 - ;
 
 \ FIXME: move
 
-: 2* ( n1 - 2*n1 ) \ core
-    dup + ;
 
-: 2/  ( n1 -- n2 ) \ core
-    dup min-n and IF 1 ELSE 0 THEN
-    [ bits/byte cell * 1- ] literal 
-    0 DO 2* swap dup 2* >r min-n and 
-      IF 1 ELSE 0 THEN or r> swap
-    LOOP nip ;
 
 : abs ( +-n1 - +n1 ) \ core
     max-n and ; 

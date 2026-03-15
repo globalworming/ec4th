@@ -9,10 +9,11 @@
 \ - Only uses bit shifting and does not need division
 
 DECIMAL
+
  : todigit ( u -- c ) 
   9 over < 7 and + [char] 0 + ;
 
-: .xdigit ( n -- )
+: .hdigit ( n -- )
 \G Print a hex digit (10 becomes A, and so on)
   $0f and todigit emit ;
 
@@ -22,7 +23,7 @@ DECIMAL
 \  ELSE 2drop 
 \  THEN ;
 
-: .xstep ( n f -- n f )
+: .hstep ( n f -- n f )
 \G Basic idea is print the highest digit and
 \G shift left one digit (4 bits)
 \G Since we want no leading 0 digits, the flag
@@ -36,36 +37,36 @@ DECIMAL
     4 - 
   ] Literal rshift
   swap over 0<> or 
-  IF   .xdigit true
+  IF   .hdigit true
   ELSE drop false
   THEN 
   swap 4 lshift swap ;
 
-: (.x) ( n f -- )  
+: (.h) ( n f -- )  
 \G Prints a hex number. If f is true we want leading 0s.
   [ cell 2* ] Literal
-  0 DO .xstep LOOP
-  0= IF .xdigit EXIT THEN drop ;
+  0 DO .hstep LOOP
+  0= IF .hdigit EXIT THEN drop ;
 
 : .addr ( n -- ) 
 \G Prints an address in hex representation
-  true (.x) space ;
+  true (.h) space ;
 
-: .x ( n -- ) 
+: .h ( n -- ) 
 \G Prints a hex numer
-  false (.x) space ;
+  false (.h) space ;
 
 : .byte ( n -- )
 \G Prints a hex byte in fixed to digit format with a trailing space.
-  dup 4 rshift .xdigit .xdigit space ;
+  dup 4 rshift .hdigit .hdigit space ;
 
 : .$ ( n -- ) 
 \G Prints a hex number with a leading $ sign and a trailing space.
-  [char] $ emit .x ;
+  [char] $ emit .h ;
 
-: .sx
+: .sh
   depth
-  dup [char] < emit .x [char] > emit space dup
-  0 ?DO dup pick .x 1- LOOP cr drop ;
+  dup [char] < emit false (.h) [char] > emit space dup
+  0 ?DO dup pick .h 1- LOOP cr drop ;
 
 \ : n.x ( n -- ) 0 do .x loop ;

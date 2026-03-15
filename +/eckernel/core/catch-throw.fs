@@ -1,5 +1,7 @@
 \ catch and throw
 
+decimal
+
 \ sp! and rp! replacements                     8mar26jw
 
 \ FIXME: move to primitives?
@@ -29,10 +31,18 @@
 User "error
 
 : .error ( throw-code -- )
+\G Display exception information to the user. The default implementation
+\G just writes the code or the counted string from "error
+\G https://forth-standard.org/standard/exception
+\G Courtesy to Heinz Schnitter we print KO for an error
   dup -2 = 
   IF 	  "error @ ?dup IF count type THEN drop
-  ELSE	." error: " .x
+  ELSE	." KO#" &10 ( n base ) .x
   THEN ;
+
+\ straight forward implementation also described in the standard"
+\ https://forth-standard.org/standard/exception/THROW
+\ https://forth-standard.org/standard/exception/CATCH
 
 User handler
 
