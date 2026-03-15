@@ -8,6 +8,9 @@
 decimal
 
 Label usart-init
+	read-offset clr,
+	write-offset clr,
+
     \ set Power Reduction Register / not needed all UART is powered by default
     \ temp1 PRR in/lds,
     \ r16 %11110001 ldi, r16 temp1 and, r16 PRR out/sts,

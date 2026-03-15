@@ -17,8 +17,7 @@ Label on-error
 3 $:
 	\ other necessary Initializations
 	zero clr,
-	read-offset clr,
-	write-offset clr,
+
 	\ sleep mode control register
 	zero smcr out/sts,
 	\ r16 clr, r16 SMCR out/sts,
@@ -430,11 +429,30 @@ Code xor ( S: n1 n2--n3 ; R -- )
 	do_next rjmp,
 End-Code+
 
+Code dmicros ( S: -- ud )
+	savetos
+	cli,
+	tosh ticks2 mov,
+	tosl ticks1 mov,
+	temp1 ticks0 mov,
+	temp0 TCNT0 in/lds,
+	\ *4 since we get 4 microseonds ticks
+	temp0 lsl, temp1 rol, tosl rol, tosh rol,
+	temp0 lsl, temp1 rol, tosl rol, tosh rol,
+	savetos
+	tosl temp0 movw,
+	sei,
+	do_next rjmp,
+End-Code+
+
 \ put the CPU to sleep forever, this will exit the simavr simulator 20260307;jw
 Code bye ( -- ) 
 	cli,
 	sleep,
 End-Code+
+
+
+
 
 \ include io/dot_s.fs
 \ include io/emit_key.fs

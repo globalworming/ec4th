@@ -1,2 +1,4 @@
+- detect when dictionar is full
+- detect stack overflow and underflow
 - DOES>
 - Make no header flag work, use Alias instead of defer

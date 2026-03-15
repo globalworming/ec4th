@@ -9,7 +9,12 @@ start-macros
 \ Aliases
 ' r2 alias zero
 
-' r11 alias mempivot
+\ timer ticks every 1024 microseconds
+' r4 alias ticks0
+' r5 alias ticks1
+' r6 alias ticks2
+
+' r13 alias mempivot
 ' r14 alias temp4
 ' r15 alias temp5
 \ Registers above 16 can be used for cpi

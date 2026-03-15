@@ -20,12 +20,12 @@ include asm-conf.fs
   dup 255 and swap 8 rshift swap 2cdeb, ;
 
 \ checks if k is between n1 and n2, and leaves a true flag if it's between them
-: check-operand ( k n1 n2 -- )
+: check-operand ( k n1 n2 -- f )
 	\ k have to be between n1 and n2
   2 pick < -rot < OR ( abort" Wrong operand value" following commands should handle their error message on their own way ) ;
 
 \ checks if k is between zero and n1 through check-operand
-: 0check-operand ( k n1 -- )
+: 0check-operand ( k n1 -- f )
 	0 swap check-operand ;
 
 \ checks if register r is between 0 and 31, aborts if not
@@ -177,7 +177,7 @@ flag-break to test-flag
 : brXX ( distance opc -- opc )
   \ ??????KKKKKKK???
   swap 2/ 1 -
-  dup -63 63 check-operand IF abort" Distance to far" THEN
+  dup -63 63 check-operand abort" Distance to far"
   dup 0 < IF
     negate 128 swap -
   THEN
@@ -190,7 +190,7 @@ flag-break to test-flag
 
 : r-jmp-call ( distance opc -- opc )
   swap 2/ 1 -
-  dup -2048 2047 check-operand IF abort" Distance to far" THEN
+  dup -2048 2047 check-operand abort" Distance to far"
   dup 0 < IF
     negate 4096 swap -
   THEN
@@ -219,11 +219,11 @@ flag-break to test-flag
 
 : brb-sc ( distance s opc -- opc )
   \ ??????KKKKKKKSSS
-  rot 2 / 1 - dup -64 63 check-operand IF abort" Distance to far" THEN
+  rot 2 / 1 - dup -64 63 check-operand abort" Distance to far"
   dup 0 < IF
     negate 128 swap -
   THEN
-  rot dup 7 0check-operand IF abort" Wrong operand value" THEN \ opc distance s
+  rot dup 7 0check-operand abort" Wrong operand value" \ opc distance s
   rot or swap 3 lshift or ;
 
 \ ##############################Labels set/call#################################
@@ -267,7 +267,7 @@ flag-break to test-flag
         $-check
       ELSE 2drop THEN
     LOOP drop
-  ELSE abort" Labels can't be set twice!" THEN ;
+  ELSE -1 abort" Labels can't be set twice!" THEN ;
 
 : $ ( index -- addr )
   branch-dest over cells + @ 0<> IF \ if we know the address of the label
@@ -282,6 +282,7 @@ flag-break to test-flag
 \ ~**********???? ??KK KKKK K???**************~
 
 : opcode-pattern-??????KKKKKKK??? ( opc1 opc2 -- )
+\ FIXE move create does> that into op:
   create , does> @ ( addr opc )
   over 0<> IF
     \ if the address to jump is known
@@ -423,7 +424,7 @@ flag-muls to test-flag
 
 : operation-????KKKKDDDDKKKK ( d k opc -- opc1 opc2 )
   2 pick 16 31 check-register-special
-  over 0 255 check-operand IF abort" Wrong operand value" THEN
+  over 0 255 check-operand abort" Wrong operand value"
   rot 16 - 4 lshift or \ k opc
   swap dup 240 and 4 lshift swap 15 and or or ;
 
@@ -466,7 +467,7 @@ flag-fmulsu to test-flag
 
 : opcode-pattern-?????????SSS???? ( opc1 opc2 -- )
   create , does> @ ( s opc -- )
-  over 7 0check-operand IF abort" Wrong operand value" THEN
+  over 7 0check-operand abort" Wrong operand value"
   swap 4 lshift or
   opc, ;
 ' opcode-pattern-?????????SSS???? to op-xt
@@ -495,7 +496,7 @@ all-models
 
 : opcode-pattern-????????AAAAABBB ( opc -- )
   create , does> @ ( A B opc -- )
-  over 7 0check-operand IF abort" Wrong operand value" THEN
+  over 7 0check-operand abort" Wrong operand value"
   2 pick check-register
   or swap 3 lshift or
   opc, ;
@@ -512,7 +513,7 @@ all-models
 : opcode-pattern-?????KKKDDDDKKKK ( opc -- )
   create , does> @ ( d K opc -- )
   2 pick 16 31 check-register-special
-  over 127 0check-operand IF abort" Wrong operand value" THEN
+  over 127 0check-operand abort" Wrong operand value"
   rot 16 - 4 lshift or
   over 112 and 4 lshift or
   swap 15 and or
@@ -529,7 +530,7 @@ flag-sts to test-flag
 : opcode-pattern-?????AADDDDDAAAA ( opc -- )
   create , does> @ ( d A opc -- )
   2 pick check-register
-  over 63 0check-operand IF abort" Wrong operand value" THEN
+  over 63 0check-operand abort" Wrong operand value"
   rot 4 lshift or over
   48 and 5 lshift or
   swap 15 and or
@@ -544,7 +545,7 @@ all-models
 
 : opcode-pattern-????????KKDDKKKK ( opc -- s)
   create , does> @ ( d k opc -- )
-  over 63 0check-operand IF abort" Wrong operand value" THEN
+  over 63 0check-operand abort" Wrong operand value"
   2 pick 24 - 2 /mod 0 3 check-register-special
   1 = abort" Wrong register value"
   rot 24 - 2/ 4 lshift or \ k opc
@@ -562,7 +563,7 @@ flag-sbiw to test-flag
 : opcode-pattern-??Q?QQ?DDDDD?QQQ ( opc1 opc2 -- )
   create , does> @ ( d q opc -- )
   -rot swap rot
-  2 pick 63 0check-operand IF abort" Wrong operand value" THEN
+  2 pick 63 0check-operand abort" Wrong operand value"
   over check-register
   swap 4 lshift or \ q opc
   over 32 and 8 lshift or
@@ -583,7 +584,7 @@ flag-std to test-flag
 
 : opcode-pattern-???????DDDDD????KKKKKKKKKKKKKKKK ( opc1 opc2 -- )
   create , does> @ ( k d opc -- )
-  2 pick 65535 0check-operand IF abort" Wrong operand value" THEN
+  2 pick 65535 0check-operand abort" Wrong operand value"
   over check-register
   swap 4 lshift or opc,
   opc, ;
@@ -606,7 +607,7 @@ flag-sts to test-flag
 
 : des, ( k -- )
 	%1001010000001011
-  over 15 0check-operand IF abort" Wrong operand value" THEN
+  over 15 0check-operand abort" Wrong operand value"
   swap 4 lshift or
   opc, ;
 
@@ -614,7 +615,8 @@ flag-sts to test-flag
 \ advanced checks for register commands
 
 : in/lds, ( n n -- )
-  dup $40 < IF
+  dup $60 u< IF
+    $20 - dup 0< abort" Expecting data memory address"
     in,
   ELSE
     swap
@@ -622,13 +624,15 @@ flag-sts to test-flag
   THEN ;
 
 : out/sts, ( n n -- )
-  dup $40 < IF
+  dup $60 u< IF
+    $20 - dup 0< abort" Expecting data memory address"
     out,
   ELSE
     swap
     sts,
   THEN ;
 
+0 [IF]
 : sbi/out/sts, ( n n n -- )
   dup $40 < IF
     drop sbi,
@@ -647,6 +651,7 @@ flag-sts to test-flag
     2 pick swap out/sts, \ out/sts, @0,@2
     2drop
   THEN ;
+[THEN]
 
 previous definitions
 

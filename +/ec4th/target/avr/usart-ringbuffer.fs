@@ -15,7 +15,7 @@ end-macros
 
 Label uart-rx-isr
     temp0 push,
-    temp0 sreg in,
+    temp0 sreg in/lds,
     temp0 push,
     temp1 push,
     zl push,
@@ -69,7 +69,7 @@ Label uart-rx-isr
     zl pop,
     temp1 pop,
     temp0 pop,
-    temp0 sreg out, \ reversed!
+    temp0 sreg out/sts, \ reversed!
     temp0 pop,
     reti,
     uart-rx-isr jmp-usart_rxc jmp!

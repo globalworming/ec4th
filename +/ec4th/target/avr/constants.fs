@@ -2,46 +2,51 @@
 
 HEX
 
+\ Addresses must be data addresses and not IO addresses
+\ Use in/lds, or out/sts, instead of in, and out,
+
 \ ################################################REGISTERS#####################
 \ Ports
 \ DDRx = Data Direction Register X
+\ this is the IO adress space, sram address would be 0x20 instead of 00
   \ Port A
-    00 constant PINA
-    01 constant DDRA
-    02 constant PORTA
+    00 $20 + constant PINA
+    01 $20 + constant DDRA
+    02 $20 + constant PORTA
   \ Port B
-    03 constant PINB
-    04 constant DDRB
-    05 constant PORTB
+    03 $20 + constant PINB
+    04 $20 + constant DDRB
+    05 $20 + constant PORTB
   \ Port C
-    06 constant PINC
-    07 constant DDRC
-    08 constant PORTC
+    06 $20 + constant PINC
+    07 $20 + constant DDRC
+    08 $20 + constant PORTC
   \ Port D
-    09 constant PIND
-    0A constant DDRD
-    0B constant PORTD
+    09 $20 + constant PIND
+    0A $20 + constant DDRD
+    0B $20 + constant PORTD
 
 
 \ Stack-Pointer
-  3D constant SPL \ Low
-  3E constant SPH \ High
+  3D $20 + constant SPL \ Low
+  3E $20 + constant SPH \ High
 
 
 \ Status Register
-  3F constant SREG
+  3F $20 + constant SREG
 
 \ Asynchronous Status Register
   B6 constant ASSR
 
 
 \ EEPROM Registers
+\ FIXME: change to data address
   21 constant EEARL \ EEPROM Address Register Low
   22 constant EEARH \         -"-             High
   1F constant EECR  \ EEPROM Control Register
   20 constant EEDR  \ EEPROM Data Register
 
-
+\ FIXME: change to data address
 \ General Purpose I/O Registers 0-2
   1E constant GPIOR0
   2A constant GPIOR1
@@ -79,9 +84,9 @@ HEX
 
 
 \ Timer/Counter Registers
-  24 constant TCCR0A  \ Timer/Counter Control Register A
-  25 constant TCCR0B  \ Timer/Counter Control Register B
-  26 constant TCNT0   \ Timer/Counter Register
+  44 constant TCCR0A  \ Timer/Counter Control Register A
+  45 constant TCCR0B  \ Timer/Counter Control Register B
+  46 constant TCNT0   \ Timer/Counter Register
   \ Timer/Counter Interrupt Mask Registers 0-2
     6E constant TIMSK0
     6F constant TIMSK1
@@ -105,10 +110,12 @@ HEX
 
 
 \ General Timer/Counter Control Register
+\ FIXME: change to data address
   23 constant GTCCR
 
 
 \ Output Compare Registers
+\ FIXME: change to data address
   \ Output Compare Registers 0
     27 constant OCR0A  \ Output Compare Register A
     28 constant OCR0B  \         -"-             B
@@ -128,8 +135,9 @@ HEX
 
 
 \ Serial Peripheral Interface
+\ FIXME: change to data address
   2C constant SPCR \ SPI Control Register
-  2D constant SPSR \ SPI Status Register
+  2D constant SPSR \ SPI Status Registerc
   2E constant SPDR \ SPI Data Register
 
 
