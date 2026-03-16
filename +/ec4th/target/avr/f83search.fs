@@ -1,13 +1,13 @@
 Decimal
 
-
-
 Code f83search ( c-addr n lfa -- nfa|0 )
+\ c-addr n is expected to be a ram address of a lower case word
 \ Search F83 headers in program memory
 \ keep search arguments in registers
+\ separate loops for ram and rom
 
 	ZL tosl movw, \ Z is pointer into dictionary
-	zh-mask-rom-address,
+
 	loadtos
 	temp0 tosl mov, \ temp0 = len
 	loadtos
@@ -15,21 +15,60 @@ Code f83search ( c-addr n lfa -- nfa|0 )
 	yh push,
 	yl tosl movw, \ Y is pointer to search string
 	temp1 ldy+, \ temp1 = name[0]
-
-Label f83search_loop
     tosl zl movw, \ save pointer to tos
+
+Label f83search-ram-loop
+	?rom-address-cp, 
+	7 $ brcs,
 	zl 2 adiw,    \ Z: lfa to nfa
+	temp2 ldZ+,       \ temp2=len+flags
+	temp2 $1f andi,
+	temp0 temp2 cp,
+	4 $ brne,
+	temp2 ldZ+,       \  temp2=dict[0]
+
+\ debug jump out
+\	tosl temp1 mov,
+\	tosh zero mov,
+\	1 $ rjmp,
+
+	temp1 temp2 cp,
+	4 $ brne,
+	temp3 temp0 mov,   \ len
+	temp4 yl movw,     \ save search string pointer
+5 $:
+	temp3 dec,			\ compare loop
+	6 $ brne,
+	tosl 2 adiw,
+	tosh-pm-forth,		\ we found something!
+	1 $ rjmp,
+6 $:
+	wl ldy+,	
+	wh ldZ+,
+	wl wh cp,
+    5 $ breq,
+	yl temp4 movw,
+4 $:
+	zl tosl movw,
+	tosl ldZ+, tosh ldZ+,
+	temp2 tosl mov,
+	temp2 tosh or,
+	1 $ breq,
+	zl tosl movw,
+	f83search-ram-loop rjmp,
+
+7 $:
+	zh-mask-rom-address,
+    tosl zl movw, 		\ save masked pointer to tos
+Label f83search-rom-loop
+
+	zl 2 adiw,    		\ Z: lfa to nfa
 	temp2 lpmZ+,       \ temp2=len+flags
 	temp2 $1f andi,
 
 	temp0 temp2 cp,
 	0 $ brne,
 	temp2 lpmZ+,       \  temp2=dict[0]
-
-\ debug jump out
-\	tosl temp1 mov,
-\	tosh zero mov,
-\	1 $ rjmp,
 
 	temp1 temp2 cp,
 	0 $ brne,
@@ -42,9 +81,9 @@ Label f83search_loop
 	tosh-pm-forth,		\ we found something!
 	1 $ rjmp,
 3 $:
-	temp1 ldy+,	
-	temp2 lpmZ+,
-	temp1 temp2 cp,
+	wl ldy+,	
+	wh lpmZ+,
+	wl wh cp,
     2 $ breq,
 	yl temp4 movw,
 0 $:
@@ -52,8 +91,9 @@ Label f83search_loop
 	tosl lpmZ+, tosh lpmZ+,
 	temp2 tosl mov,
 	temp2 tosh or,
-	1 $ breq,
-	f83search_loop rjmp,
+	zl tosl movw,  		 \ if mask is noop this is redundant
+	                     \ TODO: introduce a tosh mask macro as well
+	7 $ brne,
 1 $:
 	yh pop,
 	yl pop,
