@@ -171,6 +171,7 @@ label branch
 	temp0 lpmz+, temp1 lpmz+,
 	IPL temp0 add, IPH temp1 adc,
 	do_next rjmp,
+	0 $:
 	temp0 ldZ+, temp1 ldZ+,
 	IPL temp0 add, IPH temp1 adc,
 	do_next rjmp,
@@ -255,6 +256,19 @@ Code over ( S: n1 n2--n1 n2 n1 ; R: -- )
 	do_next rjmp,
 End-Code+
 
+Code 2dup ( d -- d d  )
+	\ duplicates a double
+	savetos
+	tosl 2 lddY, tosh 3 lddY,
+	savetos
+	tosl 2 lddY, tosh 3 lddY,
+	do_next rjmp,
+End-Code+
+
+\ ##############################################################################
+\ ################################# Arithmetic #################################
+\ ##############################################################################
+
 Code - ( S: n1 n2--n3 ; R: -- )
 	\ substract n2 from n1
 	temp0 ldY+, temp1 ldY+,
@@ -305,7 +319,38 @@ Code 2* ( S: n1--n2 ; R: -- )
 End-Code+
 
 \ ##############################################################################
-\ ##############################Return Stack####################################
+\ ############################# Comparisons ####################################
+\ ##############################################################################
+
+\ FIXME
+Code 0= ( n1 -- n2 )
+	tosl tosh or,
+	0 $ breq, 
+Label press-false	
+	tosl clr, tosh clr,
+	do_next rjmp,
+Label press-true
+	0 $:
+	tosl $ff ldi, tosh $ff ldi,
+	do_next rjmp,
+End-Code+
+
+Code 0<> ( n1 -- n2 )
+	tosl tosh or,
+	press-true brne, 
+	press-false rjmp,
+End-Code+
+
+Code 0< ( n1 -- n2 )
+	tosh $80 andi,
+	press-true brne, 
+	press-false rjmp,
+End-Code+
+
+
+
+\ ##############################################################################
+\ ############################# Return Stack ###################################
 \ ##############################################################################
 
 Code r> ( S: --n ; R: n-- )
@@ -402,32 +447,53 @@ Code sp@ ( S: --addr ; R: -- )
 End-Code+
 
 \ ##############################################################################
-\ ##############################Comparisons#####################################
+\ ############################ Bit twiddling ###################################
 \ ##############################################################################
 
 Code and ( S: n1 n2--n3 ; R: -- )
 	\	logical and
-	temp0 tosl movw,
-	loadtos
+	loadtemp
 	tosl temp0 and, tosh temp1 and,
 	do_next rjmp,
 End-Code+
 
 Code or ( S: n1 n2--n3 ; R: -- )
 	\ logical or
-	temp0 tosl movw,
-	loadtos
+	loadtemp
 	tosl temp0 or, tosh temp1 or,
 	do_next rjmp,
 End-Code+
 
 Code xor ( S: n1 n2--n3 ; R -- )
 	\ exclusive or
-	temp0 tosl movw,
-	loadtos
+	\ temp0 tosl movw,
+	\ loadtos
+	loadtemp
 	tosl temp0 eor, tosh temp1 eor,
 	do_next rjmp,
 End-Code+
+
+Code invert ( n1 -- n2)
+	\ invert / one complement
+	tosl com, tosh com,
+	do_next rjmp,
+End-Code+
+
+Code negate-xxx ( n1 -- n2)
+\ twos complement
+	\ seems not to work with neg:
+	\ tosl neg, 
+	\ tosh zero sbc,
+	\ tosh neg,
+	temp0 clr,
+	temp1 clr,
+	temp0 tosl sub,
+	temp1 tosh sbc,
+	tosl temp0 movw,
+	do_next rjmp,
+End-Code+
+
+\ negate is above
 
 Code dmicros ( S: -- ud )
 	savetos

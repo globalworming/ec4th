@@ -7,7 +7,9 @@ start-macros
 \ include constants.fs
 
 \ Aliases
-' r2 alias zero
+' r0 alias mul0 \ result of mul operation
+' r1 alias mul1 \ result of mul operation
+' r2 alias zero \ always zero, note: GCC ABI has r1 as zero
 
 \ timer ticks every 1024 microseconds
 ' r4 alias ticks0
@@ -25,7 +27,9 @@ start-macros
 ' r20 alias read-offset
 ' r21 alias write-offset
 ' r22 alias WL
+' r22 alias temp6 \ used for um* and um/mod
 ' r23 alias WH
+' r23 alias temp7 \ used for um* and um/mod
 ' r24 alias TOSL
 ' r25 alias TOSH
 
@@ -40,8 +44,8 @@ start-macros
 ' XL alias IPL \ r26
 ' XH alias IPH \ r27
 \ Y can read data memory indirectly
-\ YL r28 stack pointer
-\ YH r29 stack pointer
+\ YL r28 data stack pointer
+\ YH r29 data stack pointer
 \ Z can read program memory or data memory 
 \ ZL r30 indirect read/write general purpose
 \ ZH r31 indirect read/write general purpose
@@ -51,6 +55,9 @@ start-macros
 \ loads the value at address pointed by Y to stack
 : loadtos
   tosl ldY+, tosh ldY+, ;
+
+: loadtemp
+  temp0 ldY+, temp1 ldY+, ;
 
 \ saves the value of stack to the address pointed by Y
 : savetos
@@ -80,6 +87,9 @@ ram-start $1ff and $100 <> [IF]
 : zh-mask-rom-address,
 \ mask rom address if rom is not starting with 0
   rom-start IF ZH $7f andi, THEN ;
+
+: tosh-pm-forth,
+  rom-start IF tosh rom-start 8 rshift ori, THEN ;
 
 : mempivot-init,
 \ depending which one is on top, we use it as pivot
