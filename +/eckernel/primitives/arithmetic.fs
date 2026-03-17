@@ -4,8 +4,6 @@ UNDEF-WORDS
 
 decimal
 
-\ TODO: put some more replacements for or, - and 2*
-
 \ adds one to the TOS
 : 1+ ( S: n1--n2 ; R: -- )
 	1 + ;
@@ -53,25 +51,105 @@ decimal
 : abs ( S: n--u ; R: -- )
 	dup 0< IF negate THEN ;
 
+defined? um* 0= defined? um/mod 0= or [IF]
+ \ doubles ud and adds n to lowcell, c flag is set if MSB of highcell ud is set
+| : d2*+ ( ud n -- ud+n c ) 
+	over min-n
+	and >r >r 2dup d+ swap r> + swap r> ;
+[THEN]
+
+\ multiplies unsigned number u1 with u2 and returns the unsigned
+\ double-precision ud
+: um* ( u1 u2 -- ud ) \ core
+    >r >r 0 0 r> r> [ 8 cells ] literal 0 DO
+      over >r dup >r 0< and d2*+ drop
+      r> 2* r> swap
+    LOOP 2drop ;
 
 \ multiplies n1 with n2
 : * ( n1 n2 -- n3 )
 	um* drop ;
 
+\ M* multiplies n1 with n2 and returns the double-precision product d
+: m* ( n1 n2 -- d )
+	2dup 0< and >r
+	2dup swap 0< and >r
+	um* r> - r> - ;
+
+[IFUNDEF] um/mod
+\ IF c flag is set OR highcell dividend > divisor THEN subtract divisor from highcell dividend and add 1 to lowcell ( happens in 2d*+)
+| : /modstep ( ud c u1 -- ud c u1  )
+	>r over r@ u< 0= or IF 
+		r@ - 1
+	ELSE
+		0
+	THEN d2*+ r> ;
+[THEN]
+
+\ divide ud by u1. Returns quotient u3 and remainder u2
+: um/mod ( ud u1 -- u2 u3 ) \ core
+    0 swap [ 8 cells 1 + ] literal 0 ?DO
+      /modstep 
+    LOOP drop swap 1 rshift or swap ;
+
+: fm/mod ( d1 n1 -- n2 n3 ) \ core
+\ divide d1 by n1 and returns the floored quotient n2,
+\ also the remainder of this devision
+    dup >r dup 0< IF
+      negate >r dnegate r>
+    THEN
+    over 0< IF
+      tuck + swap
+    THEN
+    um/mod
+    r> 0< IF
+      swap negate swap
+    THEN ;
+
+: sm/rem ( d1 n1 -- n2 n3 ) \ core
+\ divide d1 by n1 and returns the symmetric quotient n3 and remainder n2.
+    over >r dup >r abs -rot
+    dabs rot um/mod
+    r> r@ xor 0< IF
+      negate
+    THEN
+    r> 0< IF
+      swap negate swap
+    THEN ;
+
+: ud/mod ( ud1 u2 -- urem udquot ) \ gforth
+	>r 0 r@ um/mod r> swap >r
+	um/mod r> ;
+
+
 \ divide n1 by n2
 : / ( n1 n2 -- n3 )
 	/mod nip ;
 
-\ returns the remainder of n1 divided by n2
-: mod ( n1 n2 -- n3 )
-	/mod drop ;
+: */mod ( n1 n2 n3 -- n4 n5 ) \ core
+    >r m* r> sm/rem ; 
+
+: s>d ( n -- d ) \ core		s-to-d
+	dup 0< ;
 
 \ returns the quotient and remainder of n1 divided by n2
 : /mod ( n1 n2 -- n3 n4 )
 	>r s>d r> fm/mod ;
 
+: */ ( n1 n2 n3 -- n4 ) \ core
+    */mod nip ;
+
+\ returns the remainder of n1 divided by n2
+: mod ( n1 n2 -- n3 )
+	/mod drop ;
+
+: mod ( n1 n2 -- n3 ) \ core
+    /mod swap drop ;
+
+0 [IF]
 \ adds n1 to n3.
 : under+ ( n1 n2 n3 -- n4 n2 )
 	rot + swap ;
+[THEN]
 
 ALL-WORDS
