@@ -3,12 +3,45 @@
 
 0 [IF]
 
-Defined parse-word. This is the only parsing word an interactive
+Define parse-word. This is the only parsing word an interactive
 interpreter needs. It relies on >in and source.
 
-The compiler also defined scan and parse.
+The compiler also defines scan and parse.
 
 [THEN]
+
+0 [IF]
+
+\ Using the length makes in more complex since we have to count down
+\ However, this implementation whould be more straight forward to do in assembler
+\ 17mar26jaw
+
+: (skip-white)-string ( c-addr len -- c-addr2 len2 )
+  BEGIN dup WHILE swap dup c@ bl u<= WHILE char+ swap 1- REPEAT swap THEN ; 
+
+[THEN]
+
+0 [IF]
+
+\ Experiment / not working code
+\ Using ?DO LOOP here could be elegant if we would have a way
+\ to return the loop variables / alternatively we could change
+\ the caller for the special case that the end of input was reached
+\ 17mar26jaw
+
+: (skip-white) ( c-addr2 c-addr1 -- c-addr2 c-addr3 )
+\ skip until end (addr2 is reached) or as long whitespace as
+\ (tab, space, newline, here: everything below 33)
+\ is encoutered. 
+  ?DO I c@ bl u> IF r> r> swap EXIT THEN LOOP 0 0 fixme ;
+
+: (parse-white) ( c-addr2 c-addr1 -- c-addr2 c-addr3 )
+\ parse until end (addr2 is reached) or whitespace
+\ (tab, space, newline, here: everything below 33)
+\ is encoutered
+   ?DO I c@ bl u<= IF r> r> swap EXIT THEN LOOP 0 0 fixme ;
+
+  [THEN]
 
 : (skip-white) ( c-addr2 c-addr1 -- c-addr2 c-addr3 )
 \ skip until end (addr2 is reached) or as long whitespace as
@@ -30,7 +63,6 @@ The compiler also defined scan and parse.
   source chars + source drop >in @ chars +
   (skip-white) tuck (parse-white) 
   ( S word-start-addr tib-end-addr word-end-addr )
-  nip dup source drop - char+ source nip min >in !
+  nip dup source drop - char+ source nip umin >in !
   ( S start end-addr ) 
   over - ;
-
