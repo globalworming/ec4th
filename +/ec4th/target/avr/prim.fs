@@ -236,10 +236,10 @@ Code drop ( S: n-- ; R: -- )
 	do_next rjmp,
 End-Code+
 
-Code 2drop ( S: n1 n2-- ; R: -- )
+Code 2drop ( S: n1 n2 -- ; R: -- )
 	\ drops 2 stack items
-  YL 2 adiw,
-  loadtos
+  	YL 2 adiw,
+  	loadtos
 	do_next rjmp,
 End-Code+
 
@@ -264,6 +264,55 @@ Code 2dup ( d -- d d  )
 	tosl 2 lddY, tosh 3 lddY,
 	do_next rjmp,
 End-Code+
+
+Code nip ( n1 n2 -- n2 )
+	YL 2 adiw,
+	do_next rjmp,
+End-Code+
+
+Code tuck ( n1 n2 -- n2 n1 n2 )
+	temp0 0 lddY, temp1 1 lddY,
+	tosl 0 stdy, tosh 1 stdy,
+	temp1 st-Y, temp0 st-Y,
+	do_next rjmp,
+End-Code+
+
+\ TODO: rot -rot ?dup todigit
+
+Code rot ( n1 n2 n3 -- n2 n3 n1 )
+	\ needs two scratch registers, e.g. temp0 temp1
+	temp0 2 lddY,
+	temp1 3 lddY,
+	r0 0 lddY,   r0 2 stdY,
+	r0 1 lddY,   r0 3 stdY,
+	tosl 0 stdY,
+	tosh 1 stdY,
+	tosl temp0 mov,
+	tosh temp1 mov,
+	do_next rjmp,
+End-Code+
+
+Code -rot ( n1 n2 n3 -- n3 n1 n2 )
+	temp0 0 lddY,
+	temp1 1 lddY,
+	r0 2 lddY,   r0 0 stdY,
+	r0 3 lddY,   r0 1 stdY,
+	tosl 2 stdY,
+	tosh 3 stdY,
+	tosl temp0 mov,
+	tosh temp1 mov,
+	do_next rjmp,
+End-Code+
+
+Code ?dup ( n -- 0 | n n )
+	temp0 tosl mov,
+	temp0 tosh or,
+	0 $ breq,
+	savetos
+	0 $:
+	do_next rjmp,
+End-Code+
+
 
 \ ##############################################################################
 \ ################################# Arithmetic #################################
@@ -322,7 +371,6 @@ End-Code+
 \ ############################# Comparisons ####################################
 \ ##############################################################################
 
-\ FIXME
 Code 0= ( n1 -- n2 )
 	tosl tosh or,
 	0 $ breq, 
@@ -347,7 +395,16 @@ Code 0< ( n1 -- n2 )
 	press-false rjmp,
 End-Code+
 
-
+Code u< ( u1 u2 -- f )
+	temp2 clr,
+	loadtemp
+	temp0 tosl cp,
+	temp1 tosh cpc,
+	temp2 zero sbc,
+	tosl temp2 mov,
+	tosh temp2 mov,
+	do_next rjmp,
+End-Code+
 
 \ ##############################################################################
 \ ############################# Return Stack ###################################
@@ -479,7 +536,7 @@ Code invert ( n1 -- n2)
 	do_next rjmp,
 End-Code+
 
-Code negate-xxx ( n1 -- n2)
+Code negate ( n1 -- n2)
 \ twos complement
 	\ seems not to work with neg:
 	\ tosl neg, 
@@ -492,8 +549,6 @@ Code negate-xxx ( n1 -- n2)
 	tosl temp0 movw,
 	do_next rjmp,
 End-Code+
-
-\ negate is above
 
 Code dmicros ( S: -- ud )
 	savetos

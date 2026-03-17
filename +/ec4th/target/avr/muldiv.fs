@@ -1,83 +1,87 @@
-\ ################ Wormis kram
+\ ################ 
 
-code um* ( n1 n2 - dn )
+decimal
+
+Code um* ( n1 n2 - dn )
+\ clobbers r0 and r1
 	temp0 ldy+, temp1 ldy+,
-	temp2 clr, temp3 clr,
-	temp4 clr, temp5 clr,
-	temp7 clr, temp6 15 ldi,
-	4 $ rjmp,
-
-	3 $:
-	tosl lsl, tosh rol,
-
-	4 $:
-	temp6 temp7 CP,
-	1 $ BRCS,
-	temp2 lsl, temp3 rol,
-	temp4 rol, temp5 rol,
-	temp7 INC,
-	tosh 7 BST,
-	3 $ BRTC,
-	CLC,
-	temp2 temp0 add,
-	temp3 temp1 adc,
-	temp4 zerol adc,
-	temp5 zeroh adc,
-	3 $ rjmp,
-
-	1 $:
+	temp2 tosl movw,
+    \ temp0:temp1 = A
+    \ tosl:tosh = B
+	\ temp4:temp5:tosl:tosh = product
+    \ A_lo * B_lo
+	temp0 temp2 mul,
+	temp4 r0 movw,
+	tosl clr,
+	tosh clr,
+    \ A_hi * B_lo
+	temp1 temp2 mul,
+	temp5 r0 add,
+	tosl r1 adc,
+	tosh zero adc,
+    \ A_lo * B_hi
+	temp0 temp3 mul,
+	temp5 r0 add,
+	tosl r1 adc,
+	tosh zero adc,
+    \ A_hi * B_hi
+	temp1 temp3 mul,
+	tosl r0 add,
+	tosh r1 adc,
 	temp5 st-y, temp4 st-y,
-
-	\  zeroh st-y, temp7 st-y,
-	loadtos
-	temp3 st-y, temp2 st-y,
 	do_next rjmp,
-	end-code+
+End-code+
 
+Start-macros
+' tosl Alias dres16uL
+' tosh Alias dres16uH
+' tosl Alias dd16uL
+' tosh Alias dd16uH
+' temp0 Alias drem16uL
+' temp1 Alias drem16uH
+' temp4 Alias dv16uL
+' temp5 Alias dv16uH
+' temp2 Alias dcnt16u
 
-code um/mod ( dn1 n2 -- remainder Quotient) 
-	temp6 ldy+, temp7 ldy+, \ highcell of dn1
-	temp4 ldy+, temp5 ldy+, \ lowcell of dn1
-	temp0 17 ldi, \ loopcounter
-	temp1 clr, \ carry
+End-macros
 
-\	temp7 tosh cp,		for testing if  n2 < high dn1, this would result in double quotient 
-\	temp6 tosl cpc,
-\	1 $ BRSH,
-\	temp2 tosl mov,		for testing if n2 != 0
-\	temp2 tosh or, 
-\	1 $ BREQ,
+Code u/mod ( n1 n2 -- remainder Quotient) 
+\ 16 bit / 16 bit division as per AVR 200 application note
+\ ec4th is using u/mod directly for normal number output
 
+\ .def	drem16uL=r14
+\ .def	drem16uH=r15
+\ .def	dres16uL=r16
+\ .def	dres16uH=r17
+\ .def	dd16uL	=r16
+\ .def	dd16uH	=r17
+\ .def	dv16uL	=r18
+\ .def	dv16uH	=r19
+\ .def	dcnt16u	=r20
 
-	0 $:
-	temp0 1 SUBI,
-	1 $ BRCS,
-	zerol temp1 cp,
-	2 $ BRNE,
-	tosh temp7 cp,
-	2 $ BRLO,
-	tosh temp7 cp,
-	4 $ BREQ,
-	clc,
-	3 $ rjmp,
-	4 $:
-	temp6 tosl cp,
-	2 $ BRSH,
-	clc,
-	3 $ rjmp,
+	dv16uL tosl movw,
+	loadtos				\ in dd16uL
+	drem16ul clr,
+	drem16uH drem16uH sub,
+	dcnt16u 17 ldi,
 	2 $:
-	temp6 tosl sub,
-	temp7 tosh sbc,
-	sec,
-	3 $:
-	temp4 rol, temp5 rol,
-	temp6 rol, temp7 rol,
-	temp1 clr, temp1 rol,
-	0 $ rjmp,
+	dd16uL rol,
+	dd16uH rol,
+	dcnt16u dec,
+	0 $ brne,
+	drem16uh st-y, drem16ul st-y,
+    do_next rjmp,
+	0 $:
+	drem16uL rol,
+	drem16uH rol,
+	drem16uL dv16uL sub,
+	drem16uH dv16uH sbc,
+	1 $ brcc,
+	drem16uL dv16uL add, 
+	drem16uH dv16uH adc,
+	clc,		\ clear carry to be shifted into result
+	2 $ rjmp,
 	1 $:
-	temp7 lsr, temp6 ror,
-	temp6 temp1 or,
-	temp7 st-y, temp6 st-y,
-	tosl temp4 movw,
-	do_next rjmp,
-end-code+
+	sec,		\ set carry to be shifted into result
+	2 $ rjmp,
+End-Code+
