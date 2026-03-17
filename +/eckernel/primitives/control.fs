@@ -24,6 +24,15 @@ decimal
 : (do) ( nlimit nstart -- )
 	r> swap rot >r >r >r ;
 
+: (?do) ( nlimit nstart -- )
+	2dup = IF
+		r> swap rot >r >r
+		dup @ + >r
+	ELSE
+		r> swap rot >r >r
+		cell+ >r
+	THEN ;
+
 \ checks if index and limit are equal,
 \ if they are set instruction pointer + one cell,
 \ so it jumps over distance, else jump to branch.
@@ -52,6 +61,8 @@ decimal
 		>r >r drop cell+ >r
 	THEN ;
 
+0 [IF]
+
 \ sets up the loop-sys with index ncount and limit 0, pushed to return stack.
 : (for) ( ncount -- )
 	r> swap 0 >r >r >r ;
@@ -64,15 +75,6 @@ decimal
 	IF
 		dup @ + >r
 	ELSE
-		cell+ >r
-	THEN ;
-
-: (?do) ( nlimit nstart -- )
-	2dup = IF
-		r> swap rot >r >r
-		dup @ + >r
-	ELSE
-		r> swap rot >r >r
 		cell+ >r
 	THEN ;
 
@@ -97,7 +99,6 @@ decimal
 		cell+
 	THEN >r ;
 
-\ FIXME -> Was macht dieser Befehl, nochma checkern
 : (-do) ( nlimit nstart -- )
 	swap 2dup
 	r> swap >r swap >r
@@ -107,7 +108,6 @@ decimal
 		cell+
 	THEN >r ;
 
-\ FIXME -> Was macht dieser Befehl, nochma checkern
 : (u-do) ( ulimit ustart -- )
 	swap 2dup
 	r> swap >r swap >r
@@ -116,6 +116,8 @@ decimal
 	ELSE
 		cell+
 	THEN >r ;
+
+[THEN]
 
 \ : perform ( a_addr -- )
 \ 	@ execute ;

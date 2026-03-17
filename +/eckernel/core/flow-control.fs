@@ -28,8 +28,10 @@
 : >resolve    ( sys -- )        here over - swap ! ;
 : <resolve    ( sys -- )        here - , ;
 
-: BUT       sys? swap ;                      immediate restrict
-: YET       sys? dup ;                       immediate restrict
+
+\ GForth special, leave out in ec4th
+\ : BUT       sys? swap ;                      immediate restrict
+\ : YET       sys? dup ;                       immediate restrict
 
 \ Structural Conditionals                              12dec92py
 
@@ -71,13 +73,17 @@ Variable leavings
 
 : ?DO       postpone (?do)  (leave) here ;
                                              immediate restrict
-: FOR       postpone (for)  here ;            immediate restrict
+
+\ GForth special, leave out in ec4th
+\ : FOR       postpone (for)  here ;            immediate restrict
 
 : loop]     dup <resolve 2 cells - postpone done postpone unloop ;
 
 : LOOP      sys? postpone (loop)  loop] ;     immediate restrict
 : +LOOP     sys? postpone (+loop) loop] ;     immediate restrict
-: NEXT      sys? postpone (next)  loop] ;     immediate restrict
+
+\ GForth special, leave out in ec4th
+\ : NEXT      sys? postpone (next)  loop] ;     immediate restrict
 
 : EXIT postpone ;s ; immediate restrict
 : ?EXIT postpone IF postpone EXIT postpone THEN ; immediate restrict
