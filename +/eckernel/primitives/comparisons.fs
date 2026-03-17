@@ -18,23 +18,23 @@ UNDEF-WORDS \ define words only if not defined
 Constant min-n
 [THEN]
 
-\ compares two unsigned integers u1 and u2, if u1 is less to u2 return true,
-\ else false
-: u< ( u1 u2 -- f )
-	2dup xor 0< IF nip 0< ELSE - 0< THEN ;
-
-\ if n is less zero return true, else false
-: 0< ( n -- f )
-	min-n and 0<> ;
+\ compares n with zero, if it is zero return a true flag,
+\ else return a false flag
+: 0= ( n -- f )
+	IF false ELSE true THEN ;
 
 \ if n is not equal to zero return true, else false
 : 0<> ( n -- f )
 	0= 0= ;
 
-\ compares n with zero, if it is zero return a true flag,
-\ else return a false flag
-: 0= ( n -- f )
-	IF false ELSE true THEN ;
+\ if n is less zero return true, else false
+: 0< ( n -- f )
+	min-n and 0<> ;
+
+\ compares two unsigned integers u1 and u2, if u1 is less to u2 return true,
+\ else false
+: u< ( u1 u2 -- f )
+	2dup xor 0< IF nip 0< ELSE - 0< THEN ;
 
 \ compares two unsigned integers u1 and u2, if u1 is greater to u2 return true,
 \ else false
