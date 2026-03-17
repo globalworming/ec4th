@@ -10,7 +10,7 @@
 [THEN]
 
 | : u.1x ( u base -- )
-    tuck 0 swap um/mod ?dup IF rot RECURSE ELSE nip THEN todigit emit ;
+    tuck u/mod ?dup IF rot RECURSE ELSE nip THEN todigit emit ;
 
 : u.x ( u base -- )
 \G Output unsigned number with arbirary base.
