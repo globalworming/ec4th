@@ -1,17 +1,17 @@
 Decimal
 
-Code f83search ( c-addr n lfa -- nfa|0 )
+| Code f83search ( c-addr n lfa -- nfa|0 )
+\ Traverse dictionary starting with word at lfa and return the nfa if 
+\ a match is found.
 \ c-addr n is expected to be a ram address of a lower case word
-\ Search F83 headers in program memory
-\ keep search arguments in registers
-\ separate loops for ram and rom
+\ Implementation: keep length and first char in registers, separate loops for ram and rom
 
 	ZL tosl movw, \ Z is pointer into dictionary
 
 	loadtos
 	temp0 tosl mov, \ temp0 = len
 	loadtos
-	yl push, \ save stack pointer
+	yl push, 	\ save stack pointer
 	yh push,
 	yl tosl movw, \ Y is pointer to search string
 	temp1 ldy+, \ temp1 = name[0]
@@ -40,7 +40,6 @@ Label f83search-ram-loop
 	temp3 dec,			\ compare loop
 	6 $ brne,
 	tosl 2 adiw,
-	tosh-pm-forth,		\ we found something!
 	1 $ rjmp,
 6 $:
 	wl ldy+,	
@@ -51,7 +50,7 @@ Label f83search-ram-loop
 4 $:
 	zl tosl movw,
 	tosl ldZ+, tosh ldZ+,
-	temp2 tosl mov,
+	temp2 tosl mov,		\ within ram the pointer would never be 0
 	temp2 tosh or,
 	1 $ breq,
 	zl tosl movw,
@@ -92,7 +91,7 @@ Label f83search-rom-loop
 	temp2 tosl mov,
 	temp2 tosh or,
 	zl tosl movw,  		 \ if mask is noop this is redundant
-	                     \ TODO: introduce a tosh mask macro as well
+	                     \ TODO: we could reduce one instruction with a tosh mask macro
 	7 $ brne,
 1 $:
 	yh pop,

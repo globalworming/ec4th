@@ -32,6 +32,8 @@ lock
 
 
 include +/ec4th/target/atmega328.fs
+include +/ec4th/target/avr/f83search.fs
+
 include +/ec4th/target/avr/io/uart.fs
 include +/ec4th/target/avr/usart-ringbuffer.fs
 \ include +/ec4th/target/avr/io/dot_s.fs
@@ -47,6 +49,7 @@ include +/eckernel/primitives/minimal.fs
 include +/eckernel/nio/dothex.fs
 include +/eckernel/debug/dump.fs
 
+include +/eckernel/core/hashed-search.fs
 include +/eckernel/core/compiler.fs
 include +/eckernel/core/interpreter.fs
 include +/eckernel/core/flow-control.fs
@@ -74,17 +77,30 @@ include +/eckernel/primitives/doers.fs
 \ #############################Code#############################################
 \ ##############################################################################
 
+: abcd ;
+
 Decimal
 
 >auto
+
+[IFDEF] current 
+  forth-wordlist current !
+  >ram unlock tdp @ lock dp !
+[THEN]
+
+has? hash-bits [IF]
+
+forth-wordlist unlock 
+copy-hash-links 
+lock
+
+[ELSE]
 
 \ Set up last and forth-wordlist with the address of the last word's
 UNLOCK tlast @ LOCK 
 1 cells -
 forth-wordlist !
-[IFDEF] current 
-  forth-wordlist current !
-  >ram unlock tdp @ lock dp !
+
 [THEN]
 
 include +/gforth/ec/mirror.fs
@@ -96,8 +112,6 @@ include +/gforth/ec/mirror.fs
 
 \ vektor belegen
  ' boot >body init-ip !
-
-
 
  unlock
 .unresolved

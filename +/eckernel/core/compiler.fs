@@ -2,9 +2,6 @@
 
 \ Stripped down compiler extracted from GForth around 2008.
 
-\ Not 100% standards compatible: IS does not have different compile 
-\ and interpretation semantics, use [IS] 
-
  Variable state ( -- a-addr ) \ core,tools-ext
  \G @code{User} variable -- @i{a-addr} is the address of a cell
  \G containing the compilation state flag. 0 => interpreting, -1 =>
@@ -52,6 +49,10 @@ Variable lastcfa
 : string, ( c-addr u -- ) \ gforth
 \G puts down string as cstring, the resulting DP may be not aligned
     dup c, here swap chars dup allot move ;
+
+| : name, ( c-addr u -- ) \ gforth
+\G puts down string as cstring, converting to lowercase the resulting DP may be not aligned
+    dup c, bounds DO I c@ lwc c, LOOP ;
 
 ' , Alias compile,
 
@@ -197,10 +198,22 @@ Variable lastcfa
     \G A synonym for @code{compile-only}
     restrict-mask ?last-cset ;
 
+| : current-bucket ( nfa -- wid-bucket )
+\ find hash bucket for a newly created word
+    [ [IFDEF] hash-bucket ] 
+        name>string hash-bucket cells current @ +
+    [ [ELSE] ]
+        drop current @
+    [ [THEN] ] ;
+
 : header ( "name" -- )
     parse-word name-too-short? name-too-long?
-    align here last ! current @ @ , \ link field
-    string, ;
+    \ on 8 bit systems there is no real need for alignment
+    \ however, its good practise to have it cell aligned, sinc
+    \ otherwise dumps are very confusing ;jw
+    align here last ! 0 , \ link field
+    \ place string, patch link field with the link in the bucket
+    here >r name, r> current-bucket @ last @ ! ;
 
 \ Create Variable User Constant                        	17mar93py
 
@@ -242,8 +255,8 @@ Variable lastcfa
 : reveal ( -- ) \ gforth
     last @ ?dup
     IF \ the last word has a header
-        dup cell+ name>string current @ check-shadow
-        current @ !
+        dup cell+ dup name>string current @ check-shadow
+        current-bucket ! 
         last off
     THEN ;
 

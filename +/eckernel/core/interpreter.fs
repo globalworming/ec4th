@@ -1,5 +1,7 @@
 
 
+Undef-words
+
 \ F83 word headers, using one byte as length and flags.
 
 hex
@@ -33,7 +35,11 @@ decimal
 : words
 \G Print defined words. This is not in a standard wordset, however, its useful
 \G for debugging the target
-    forth-wordlist BEGIN @ dup WHILE dup cell+ name>string type space REPEAT drop ;
+    forth-wordlist
+    [ 1 has? hash-bits lshift ] literal 0 DO dup
+        BEGIN @ dup WHILE dup cell+ name>string type space REPEAT drop 
+        cell+ 
+    LOOP drop ;
 
 : upc ( c1 -- c2 )
 \G Convert ASCII c1 to uppercase. Input values from ASCII a-z are converted to A-Z,
@@ -46,6 +52,11 @@ decimal
 \G all other values are unchanged
 \G Needed for dictionary search and number conversion
     dup [char] A [ char Z 1+ ] literal within [ char a char A - ] literal and + ;
+
+: tolower ( c-addr1 len -- c-addr2 len )
+\ convert search string to lower case once and put it to here
+
+    tuck here dup >r -rot bounds DO I c@ lwc over c! char+ LOOP drop r> swap ;
 
 : comparedict ( adr1 len1 adr2 len2 -- flag )
   rot over <> IF 2drop drop false EXIT THEN
@@ -63,15 +74,13 @@ bigendian 0= 1 cells 2 = and [IF]
 \ - 16 bit
 \ - words in dictionary are lower case
 
+
+
 : (compare) ( adr1 adr2 len -- flag )
   bounds ?DO dup c@ I c@ <> 
              IF drop UNLOOP false EXIT THEN 
   char+ LOOP
   drop true ;
-
-: tolower ( c-addr1 len -- c-addr2 len )
-\ convert search string to lower case  once and put it to here
-    tuck here dup >r -rot bounds DO I c@ lwc over c! char+ LOOP drop r> swap ;
 
 \ This implementation keeps a 16 bit value on the return stack with the containing
 \ the length and the first character. Cuts traversal time approximately in half.
@@ -99,21 +108,20 @@ bigendian 0= 1 cells 2 = and [IF]
   char+ LOOP
   drop true ;
 
-: find-name-in ( adr len lfa -- nfa | 0 )
+: find-name-in ( adr len dict -- nfa | 0 )
 \G Forth 2012 suggestion, https://forth-standard.org/proposals/find-name#contribution-58
   BEGIN @ dup WHILE >r 2dup r@ cell+ name>string comparedict-ignore-case
         IF 2drop r> cell+ EXIT THEN r>
   REPEAT nip nip ;
 [THEN]
 
-
-[IFUNDEF] find-name
+[IFUNDEF] forth-wordlist
 \G points to the last defined word
 Variable forth-wordlist
+[THEN]
 
 : find-name ( c-addr u -- nt | 0 ) 
   forth-wordlist find-name-in ;
-[THEN]
 
 \ : sfind ( c-addr u -- 0 / xt +-1  ) \ GFORTH
 \ \ used in the interpreter loop
@@ -268,7 +276,7 @@ const Create bases   10 ,   2 ,   A , 100 ,
 require tib.fs
 require parse-word.fs
 
-: (interpret) ( ?? -- ?? ) \ gforth
+: interpret ( ?? -- ?? ) \ gforth
 \ interpret/compile the (rest of the) input buffer
     BEGIN ?stack parse-word dup 
     WHILE  
@@ -287,10 +295,10 @@ require parse-word.fs
     base @ >r 10 base ! <# #s #> type r> base !
     ." ms " ;
 
-\ FIXME experimental / move
-: interpret 
+: quit-interpret
+\G Optionally wrapped interpret with extra state display
     dmicros start-time 2!
-    (interpret)
+    interpret 
     dmicros start-time 2@ d- .elapsed ;
 
 : refill ( -- flag ) \ core-ext,block-ext,file-ext
@@ -320,7 +328,8 @@ require parse-word.fs
         [ [ELSE] ]  \ interpreter only version
                     ." ok" cr
         [ [THEN] ]
-        refill drop interpret 
+        refill drop 
+        quit-interpret
     AGAIN ;
 
 : evaluate ( c-addr u -- ) \ core,block
@@ -350,3 +359,4 @@ require parse-word.fs
 : '    ( "name" -- xt ) \ core	tick
     (') name?int ;
 
+All-words

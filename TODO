@@ -1,7 +1,18 @@
+
+- write down hash algo findnigs
+- finish hashed directory search
+
+- implement millis and delay
+- move cross
+- improve donext by one cycle with a macro
 - interpretation semantics of s" and ."
-- have 0 as word and possible primitive, alias to s>d
+- should we integrate tolower in parse-word?
+- implement parse-word, skip, scan, tolower in assembler to speed up interpreter/compiler
+- have 0 as word and possible primitive
 - abort" does not take flag, have ?abort", https://forth-standard.org/standard/exception/ABORTq
 - detect when dictionary is full, see pad
 - detect stack overflow and underflow
 - DOES>
-- Make no header flag work, use Alias instead of defer
+- Make no header flag work / use Alias instead of defer
+- speed: todigit in assembler
+- speed: flip ram/rom mapping to get rid of the masking?
