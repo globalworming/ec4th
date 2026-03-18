@@ -32,3 +32,5 @@ include avr/usart-init.fs
 include avr/timer0-ticks.fs
 include avr/prim.fs
 include avr/muldiv.fs
+include avr/arduino-library.fs
+

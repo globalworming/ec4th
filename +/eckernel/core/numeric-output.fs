@@ -5,20 +5,19 @@
 \ although there is a dictionary overflow. 
 
 [IFUNDEF] todigit
- : todigit ( u -- c ) 
-    9 over < 7 and + [char] 0 + ;
+ : todigit ( u -- c ) 9 over < 7 and + [char] 0 + ;
 [THEN]
 
 | : u.1x ( u base -- )
     tuck u/mod ?dup IF rot RECURSE ELSE nip THEN todigit emit ;
 
-: u.x ( u base -- )
-\G Output unsigned number with arbirary base.
+: u.x ( u base -- ) \ ec4th
+\G Output unsigned number with arbirary base. Does not add a trailing space.
 \G Only uses stack for the output and does not rely on available dictionary space
 \G as pictured numeric output would do.
     over 0= IF 2drop '0 emit ELSE u.1x THEN ;
 
-: .x ( n base -- )
+: .x ( n base -- ) \ ec4th
 \G Output signed number with arbirary base
 \G Only uses stack for the output and does not rely on available dictionary space
 \G as pictured numeric output would do.
