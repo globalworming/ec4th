@@ -1210,6 +1210,10 @@ false DefaultValue rom-defer
 255 DefaultValue MAX-CHAR
 255 DefaultValue /COUNTED-STRING
 
+\ hash bits to use for directory hashing. 3 bits resulting in a 8 cells
+\ hash root table.
+3 DefaultValue hash-bits
+
 >TARGET
 s" relocate" T environment? H 
 \ JAW why set NIL to this?!
@@ -2244,6 +2248,31 @@ NoHeaderFlag off
 Defer setup-execution-semantics  ' noop IS setup-execution-semantics
 0 Value lastghost
 
+T has? hash-bits H Constant hash-bits
+
+Create hash-links here 1 hash-bits lshift cells dup allot erase
+
+: hash-djb2 ( addr len -- u )
+  &5381 -rot bounds ?do &33 * i c@ + loop ;
+
+\ described in ec4th/kernel/hashed-find.fs
+: dictionary-hash-jaw
+  1- dup IF + dup 1- c@ lwc dup 2/ 2/ + swap c@ lwc + ELSE + c@ lwc THEN ;
+
+: dictionary-hash dictionary-hash-jaw ;
+
+\ : dictionary-hash  hash-djb2  ;
+
+: (hash-bucket) ( addr len -- n )
+  dictionary-hash [ 1 hash-bits lshift 1- ] literal and  ;
+
+\ : dictionary-hash-bucket 2dup (hash-bucket) cr ." bucket: " dup base @ swap decimal . base ! -rot space type cr ;
+' (hash-bucket) Alias dictionary-hash-bucket
+
+\ copy the hash links into the target at the specified address
+: copy-hash-links ( addr -- )
+    hash-links 1 hash-bits lshift 0 DO >r r@ @ over T ! cell+ H r> cell+ LOOP 2drop  ;
+
 : (THeader ( "name" -- ghost )
     \  >in @ bl word count type 2 spaces >in !
     \ wordheaders will always be compiled to rom
@@ -2253,7 +2282,12 @@ Defer setup-execution-semantics  ' noop IS setup-execution-semantics
     IF  NoHeaderFlag off
     ELSE
 	T align H view,
-	tlast @ dup 0> IF tcell - THEN T A, H  there tlast !
+  hash-bits 0= IF 
+	  tlast @ dup 0> IF tcell - THEN T A, H  there tlast !
+  ELSE
+    >in @ bl word count dictionary-hash-bucket swap >in !
+    cells hash-links + >r r@ @ there swap T A, H r> ! there tlast !
+  THEN
 	1 headers-named +!	\ Statistic
 	>in @ T name, H >in !
     THEN
@@ -3801,6 +3835,7 @@ previous
 : linkstring ( addr u n addr -- )
     X here over X @ X , swap X ! X , ht-string, X align ;
 : . . ;
+: erase bounds ?do 0 I X c! loop ;
 
 : all-words    ['] forced?    IS skip? ;
 : needed-words ['] needed?  IS skip? ;
