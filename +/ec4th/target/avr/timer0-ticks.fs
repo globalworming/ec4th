@@ -4,6 +4,11 @@ Label timer0-ticks-init
     ticks0 clr,
     ticks1 clr,
     ticks2 clr,
+    millis0 clr,
+    millis1 clr,
+    millis2 clr,
+    millis3 clr,
+    millisfraction clr,
 
     \ TCCR0B — Timer/Counter0 Control Register B
     \ Bit  Name    Function
@@ -107,9 +112,11 @@ Label timer0-ticks-init
     \               1     1     0      Reserved
     \               1     1     1      Fast PWM (OCR0A top)
     temp0 %00000011 ldi, temp0 TCCR0A out/sts,
-    1 $ rjmp,
+    \ skip isr
+    3 $ rjmp,
 
 Label timer0-ticks-isr
+\ clobbers temp0 to save sreg
     temp0 push,
     temp0 sreg in/lds,
     temp0 push,
@@ -119,10 +126,27 @@ Label timer0-ticks-isr
     0 $ brne,
     ticks2 inc,
     0 $:
+    \ counts every 1024 microseconds
+    millis0 inc,
+    1 $ brne,
+    millis1 inc,
+    1 $ brne,
+    millis2 inc,
+    1 $ brne,
+    millis3 inc,
+    1 $:
+    temp0 42 ldi,
+    millisfraction temp0 cp,
+    2 $ brne,
+    millisfraction clr,
+    0 $ rjmp,
+    2 $:
+    millisfraction inc,
     temp0 pop,
     temp0 sreg out/sts,
     temp0 pop,
     reti,
-1 $:
+3 $:
+    \ initialise vector
     timer0-ticks-isr jmp-tim0_ovf jmp!
 End-Label+

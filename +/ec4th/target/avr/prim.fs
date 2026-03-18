@@ -566,6 +566,27 @@ Code dmicros ( S: -- ud )
 	do_next rjmp,
 End-Code+
 
+Code millis ( S: -- u )
+	savetos
+	cli,
+	tosl millis0 mov,
+	tosh millis1 mov,
+	sei,
+	do_next rjmp,
+End-Code+
+
+Code dmillis ( S: -- ud )
+	savetos
+	cli,
+	tosl millis0 mov,
+	tosh millis1 mov,
+	savetos
+	tosl millis2 mov,
+	tosh millis3 mov,
+	sei,
+	do_next rjmp,
+End-Code+
+
 \ put the CPU to sleep forever, this will exit the simavr simulator 20260307;jw
 Code bye ( -- ) 
 	cli,

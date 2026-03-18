@@ -11,10 +11,15 @@ start-macros
 ' r1 alias mul1 \ result of mul operation
 ' r2 alias zero \ always zero, note: GCC ABI has r1 as zero
 
-\ timer ticks every 1024 microseconds
-' r4 alias ticks0
+\ since we have registers to spare, use it for the timer counter
+' r4 alias ticks0 \ timer ticks every 1024 microseconds
 ' r5 alias ticks1
 ' r6 alias ticks2
+' r7 alias millis0 \ millisecond timer
+' r8 alias millis1
+' r9 alias millis2
+' r10 alias millis3
+' r11 alias millisfraction
 
 ' r13 alias mempivot
 ' r14 alias temp4
@@ -27,9 +32,7 @@ start-macros
 ' r20 alias read-offset
 ' r21 alias write-offset
 ' r22 alias WL
-' r22 alias temp6 \ used for um* and um/mod
 ' r23 alias WH
-' r23 alias temp7 \ used for um* and um/mod
 ' r24 alias TOSL
 ' r25 alias TOSH
 
