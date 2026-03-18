@@ -287,24 +287,21 @@ require parse-word.fs
         [ [THEN] ]
     REPEAT 2drop ;  
 
-2Variable start-time
+\ Allow quit-interpret to be redefined with other useful things
+[IFUNDEF] quit-interpret
 
-: .elapsed ( d -- ) 
-    '~ emit
-    1000 um/mod nip s>d
-    base @ >r 10 base ! <# #s #> type r> base !
-    ." ms " ;
+: .elapsed ( u -- ) 
+    '~ emit 10 u.x ." ms " ;
 
 : quit-interpret
-\G Optionally wrapped interpret with extra state display
-    dmicros start-time 2!
-    interpret 
-    dmicros start-time 2@ d- .elapsed ;
+\G Decorated interpret when called within quit. Adds timing display.
+    millis >r interpret millis r> - .elapsed ;
+
+[THEN]
 
 : refill ( -- flag ) \ core-ext,block-ext,file-ext
 \G refill the input buffer
     tib dup >tib ! /line accept #tib ! 0 >in ! true ;
-
 
 : quit-error ( ... n -- ... )
 \ target for throw if no catch handler is defined
