@@ -10,14 +10,19 @@ doer? :dodefer [IF]
     Create ['] noop A, DOES> @ execute ;
 [THEN]
 
+ [IFDEF] state 
 : [is] ( compilation "name" -- ; run-time xt -- ) \ gforth bracket-is
 \g At run-time, changes the @code{defer}red word @var{name} to
 \g execute @var{xt}.
     ' >body postpone ALiteral postpone ! ; immediate restrict
+[THEN]
 
 : is ( "name" xt -- ) \ gforth
 \g Changes the @code{defer}red word @var{name} to execute @var{xt}.
-    state @ IF [is] ELSE ' >body ! THEN ; immediate restrict
+    [ [IFDEF] state ]
+        state @ IF [is] EXIT THEN 
+    [ [THEN] ]
+    ' >body ! ; immediate restrict
 
 ' is alias to
 ' [is] alias [to]
