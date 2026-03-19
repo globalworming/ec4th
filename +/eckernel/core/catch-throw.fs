@@ -14,10 +14,9 @@ decimal
   2/ dup 0> IF 
     0 DO drop LOOP
   ELSE
-    drop
-    \ going downwards should not happen
-    \ however, we dould keep the contents intact via sp@
-    \ 0 ?DO sp@ cell+ / cell- @ LOOP
+    \ happens on an underflow
+    \ however, we should keep the contents intact via sp@
+    negate 0 ?DO sp@ 1 cells - @ LOOP
   THEN
   ;
 [THEN]

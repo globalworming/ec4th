@@ -20,7 +20,7 @@ start-macros
 ' r9 alias millis2
 ' r10 alias millis3
 ' r11 alias millisfraction
-
+' r12 alias buffer-status
 ' r13 alias mempivot
 ' r14 alias temp4
 ' r15 alias temp5

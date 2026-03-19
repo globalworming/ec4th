@@ -268,10 +268,13 @@ const Create bases   10 ,   2 ,   A , 100 ,
     THEN ;
 
 : ?stack ( ?? -- ?? ) \ gforth
-    sp@ sp0 @ u> IF    -4 throw  THEN
-[ has? floating [IF] ]
-    fp@ fp0 @ u> IF  -&45 throw  THEN
-[ [THEN] ] ; 
+    sp@ sp0 @ u> IF
+        [ unlock data-stack borders nip lock ] literal sp!
+        -4 throw  
+    THEN
+    [ has? floating [IF] ]
+        fp@ fp0 @ u> IF  -&45 throw  THEN
+    [ [THEN] ] ; 
 
 require tib.fs
 require parse-word.fs
@@ -293,9 +296,14 @@ require parse-word.fs
 : .elapsed ( u -- ) 
     '~ emit 10 u.x ." ms " ;
 
+: available dictionary-end-address /pad - /hold - here - ;
+
+: .eaten ( u -- ) 
+    ?dup IF '- emit 10 u.x 'b emit available 10 u.x 'b emit space THEN ;
+
 : quit-interpret
 \G Decorated interpret when called within quit. Adds timing display.
-    millis >r interpret millis r> - .elapsed ;
+    millis >r here >r interpret here r> - .eaten millis r> - .elapsed ;
 
 [THEN]
 

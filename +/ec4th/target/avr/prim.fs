@@ -1,48 +1,43 @@
-DECIMAL
+\ AVR primitives
+
+decimal
 
 Label into-forth
-	3 $ rjmp,
-
-\ FIXME not used yet
-Label on-error
-	\ init data stack again, expect error code in tos
-	init-dataStack addr>pm
-	ZH over highbyte ldi, ZL swap lowbyte ldi,
-	YL lpmz+, YH lpmz,
-	\ init instruction pointer
-	error-ip addr>pm 
-	ZL over lowbyte ldi, ZH swap highbyte ldi,
-	IPL lpmz+, IPH lpmz,
-	4 $ rjmp,
-3 $:
-	\ other necessary Initializations
 	zero clr,
-
 	\ sleep mode control register
 	zero smcr out/sts,
-	\ r16 clr, r16 SMCR out/sts,
-
-	temp1 '~ ldi,
-	xxx rcall,
-
-	\ init instruction pointer
-	init-ip addr>pm 
-	ZL over lowbyte ldi, ZH swap highbyte ldi,
-	IPL lpmz+, IPH lpmz,
-
-\ Initialization: Rom Start
-\ FIXME from region
-\    temp0 $80 ldi,
-\	mempivot temp0 mov,
+	\ Initialization: Rom Start
 	mempivot-init,
+	\ by holding the tos in registers we loose two bytes in data space
+	\ initial tos content, that gets written at the start of the stack
+	tosh $ba ldi,
+	tosl $ad ldi,
 
 	\ init data stack
 	init-dataStack addr>pm
 	ZH over highbyte ldi, ZL swap lowbyte ldi,
 	YL lpmz+, YH lpmz,
 	YL 2 adiw,
+	savetos
+	tosl clr, tosh clr,
 
-4 $:
+\	temp1 '~ ldi,
+\ 	xxx rcall,
+
+\ Error entry, expect the error code in TOS
+Label on-error
+	sei, \ make sure interrupts are enabled and we receive serial data
+
+	\ init data stack, again for error entry
+	init-dataStack addr>pm
+	ZH over highbyte ldi, ZL swap lowbyte ldi,
+	YL lpmz+, YH lpmz,
+
+	\ init instruction pointer
+	init-ip addr>pm 
+	ZL over lowbyte ldi, ZH swap highbyte ldi,
+	IPL lpmz+, IPH lpmz,
+
 	\ init return stack
 	init-ramend addr>pm
 	ZL over lowbyte ldi, ZH swap highbyte ldi,
@@ -592,8 +587,6 @@ Code bye ( -- )
 	cli,
 	sleep,
 End-Code+
-
-
 
 
 \ include io/dot_s.fs

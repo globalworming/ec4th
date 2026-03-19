@@ -1,9 +1,14 @@
-
+done:
 - write down hash algo findnigs
 - finish hashed directory search
 - implement millis and delay
+- arduinio: io! io@, pins
+- key?
+- interrupt on ctrl-c
+- print remaining dictionary space, if changed
 
-- io! io@
+todo:
+- have boot as command / means to reset forth completely
 - move cross
 - interpretation semantics of s" and ."
 - detect when dictionary is full, see pad

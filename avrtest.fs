@@ -21,10 +21,12 @@ $8000 $8000 region rom-dictionary
 
 \ return stack needs to be quite deep depending on the 
 \ prmitives
-ram-dictionary $80 steal-from-end region return-stack
+ram-dictionary $40 steal-from-end region return-stack
 ram-dictionary $40 steal-from-end region data-stack
-\ FIXME: optimise tib
-ram-dictionary $ff steal-from-end region tib-region
+\ FIXME: optimise tib input ring buffer
+\ on Arduino this region is used for the usart input ring buffer 
+\ make it longer than an input line, so one line is buffered while compiling
+ram-dictionary 90 steal-from-end region tib-region
 
 setup-target
 
@@ -77,15 +79,13 @@ include +/eckernel/primitives/doers.fs
 \ #############################Code#############################################
 \ ##############################################################################
 
-: abcd ;
-
 Decimal
 
->auto
+>rom
 
 [IFDEF] current 
   forth-wordlist current !
-  >ram unlock tdp @ lock dp !
+  >ram unlock tdp @ lock dup . dp !
 [THEN]
 
 has? hash-bits [IF]
@@ -105,10 +105,20 @@ forth-wordlist !
 
 include +/gforth/ec/mirror.fs
 
- : boot 
-   mirrorram
-  ." ec4th" cr
-   quit bye ;
+ : boot ( 0|error -- )
+  ?dup IF 
+    dup -99 = IF 
+      cr ." ===> Input overrun, press Ctrl-C <===" cr 
+      \ this loop is expected to read faster then we receive with 115k, so
+      \ we don't see repeated overrun lines
+      BEGIN key? IF key drop THEN AGAIN
+    THEN
+    quit-error
+  ELSE 
+    mirrorram
+    ." ec4th" cr quit
+  THEN
+  bye ;
 
 \ vektor belegen
  ' boot >body init-ip !

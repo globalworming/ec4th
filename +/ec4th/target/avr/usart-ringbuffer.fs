@@ -1,5 +1,6 @@
+\ USART ring buffer implementation for Arduino / AVR        13mar26jaw
 
-
+decimal
 
 start-macros
 also cross 
@@ -22,9 +23,13 @@ Label uart-rx-isr
     zh push,
 
     temp0 udr0 in/lds,
+    temp0 3 cpi, \ Ctrl-C?
+    4 $ brne,
+    tosl -28 255 and ldi,
+    tosh 255 ldi,
+    on-error rjmp, \ initialises stacks again
 
-    \ TODO detect overflow / full buffer
-
+    4 $:
     \ store into buffer
     ZL buffer-start lowbyte ldi,
     ZH buffer-start highbyte ldi,
@@ -33,11 +38,20 @@ Label uart-rx-isr
     temp0 stz, 
 
     \ increment and wrap around
-    write-offset inc, 
+    write-offset inc,
     write-offset buffer-size cpi, 
     0 $ brne,
     write-offset clr,
     0 $:
+
+    \ if after incrementing pointers are equal, we have an overflow
+    \ unfortunately, this simple approach wastes one byte of buffer space
+    write-offset read-offset cp, 
+    3 $ brne,
+    tosl -99 255 and ldi,
+    tosh 255 ldi,
+    on-error rjmp, \ initialises stacks again
+    3 $:
 
     \ debug write ofset
     \ temp0 write-offset mov,
@@ -46,24 +60,29 @@ Label uart-rx-isr
     \ temp0 UDR0 out/sts,
 
     \ throttle
-    \ compute characters in buffer into temp0
-1 [IF]
-    clc,
+    \ This sends XOFF after threshold is reached
+    \ If the transmit register is busy, we don't send it and
+    \ will send it when we receive the next char. This way, 
+    \ if there is concurrent output, we don't block in the ISR
+    clc, \ calculate buffer size
     temp0 write-offset mov,
     temp0 read-offset sbc,
     1 $ brcc,
     clc,
     temp0 0 buffer-size - $ff and subi,
-    \ send XOFF once if at threshold
     1 $:
-    temp0 throttle-threshold cpi,
-    2 $ brne,
-    temp1 $13 ldi,
-    \ temp1 '^ ldi,
-    temp1 UDR0 out/sts, 
-    \ transmit rcall,
+
+    temp0 throttle-threshold cpi, \ send XOFF once if at threshold
+    2 $ brcc,
+    buffer-status buffer-status and, \ skip if XOFF was send before
+    2 $ breq,
+    temp1 UCSR0A in/lds, \ skip if output register is busy
+    temp1 5 sbrs,
+    2 $ rjmp,
+    temp1 $13 ldi, \ send XOFF and set flag
+    temp1 UDR0 out/sts,
+    buffer-status dec,
     2 $:
-[THEN]
 
     zh pop,
     zl pop,
@@ -76,13 +95,9 @@ Label uart-rx-isr
 End-label+
 
 label receive-char
+    read-offset write-offset cp, \ I think we don't need cli for comparison
+    receive-char breq,
     cli,
-    read-offset write-offset cp,
-    0 $ brne,
-    sei,
-    receive-char rjmp,
-
-    0 $:
     ZL buffer-start lowbyte ldi,
     ZH buffer-start highbyte ldi,
 
@@ -97,14 +112,15 @@ label receive-char
     1 $:
 
     sei,
-
-    \ send XON, if transmit register is not empty wait, to make sure the 
+    \ send XON, if transmit register is not empty then wait
+    \ to make sure the to XON is sent
     read-offset write-offset cp,
     2 $ brne,
     temp1 push,
     temp1 $11 ldi,
     transmit rcall,
     temp1 pop,
+    buffer-status clr,
     2 $:
 
     ret,
