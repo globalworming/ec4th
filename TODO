@@ -1,14 +1,9 @@
-done:
-- write down hash algo findnigs
-- finish hashed directory search
-- implement millis and delay
-- arduinio: io! io@, pins
-- key?
-- interrupt on ctrl-c
-- print remaining dictionary space, if changed
-
 todo:
+- only print millis and unused when not more input is coming?
+- cross compiled 2constant is not working
 - have boot as command / means to reset forth completely
+- fix abort", no flag in standard
+- character parsing, according to standard: 'c'
 - move cross
 - interpretation semantics of s" and ."
 - detect when dictionary is full, see pad

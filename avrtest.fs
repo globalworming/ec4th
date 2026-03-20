@@ -57,23 +57,16 @@ include +/eckernel/core/interpreter.fs
 include +/eckernel/core/flow-control.fs
 include +/eckernel/core/numeric-output.fs
 include +/eckernel/core/picture-numeric-output.fs
-
 include +/eckernel/primitives/doers.fs
 
-\ da muss jens ran:
-\ include +/eckernel/todo/int.fs
+include +/eckernel/testing/tester.fs
+include +/eckernel/testing/test-constants.fs
 
-\ include +/gforth/kernel/int.fs
-\ include +/gforth/kernel/comp.fs
 
 \ Codes for testing the Forth-System
 \ include +/gforth/arch/misc/tt.fs
 \	include nqueens.fs
 
-
-
-\ include Forth-System Initiliziation Helping files
-\ include +/gforth/ec/mirror.fs
 
 \ ##############################################################################
 \ #############################Code#############################################
@@ -116,7 +109,7 @@ include +/gforth/ec/mirror.fs
     quit-error
   ELSE 
     mirrorram
-    ." ec4th" cr quit
+    ." ec4th" quit
   THEN
   bye ;
 

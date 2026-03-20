@@ -3,23 +3,6 @@
 UNDEF-WORDS
 decimal
 
- \ FIXME
-\ : create ; 
-\ : : ;
-\ : does> ;
-
-[IFUNDEF] Constant
-: Constant  \ core 
-    does> @ @ ;
-[THEN]
-
-[IFUNDEF] Value
-: Value does> @ ;
-[THEN]
-
-[IFUNDEF] Defer
-: Defer does> @ execute ;
-[THEN]
 
 [IFUNDEF] AUser
 : uallot ( n -- ) \ gforth

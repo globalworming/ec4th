@@ -296,7 +296,9 @@ doer? :docon [IF]
 
 \ FIXME: cross.fs compiles doesjump at the start of does> section, remove or keep it for see?
 : :doesjump ;
+
 : (does>2)
+\ patch CFA to point to DOES> part
     2 cells + \ FIXME: skip doesjump: remove it
     lastcfa @ lit :dodoes over ! cell+ ! ;
 

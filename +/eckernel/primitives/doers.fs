@@ -12,8 +12,12 @@
 \ [THEN]
 
 \ FIXME avoid these fillers
-: (does>2) ;
+
 : :doesjump ;
+
+UNDEF-WORDS
+
+: (does>2) true abort" unsupported, compiler missing" ;
 
 \ TODO add rom value support
 doer? :dovalue 0= [IF]
@@ -23,7 +27,7 @@ doer? :dovalue 0= [IF]
 \ TODO add rom defer support
 doer? :dodefer 0= [IF]
 has? rom-defer [IF]
-| : Defer ( "name" -- )  DOES> @ @ execute ;
+| : Defer ( "name" -- ) DOES> @ @ execute ;
 [ELSE]
 | : Defer ( "name" -- ) DOES> @ execute ;
 [THEN]
@@ -33,7 +37,7 @@ has? rom-defer [IF]
 \     DOES> ( -- w1 w2 ) 2@ ;
 
 doer? :docon 0= [IF]
-| : (Constant)  DOES> @ ;
+| : (Constant) DOES> @ ;
 [THEN]
 
 doer? :douser 0= defined? up@ and [IF]
@@ -43,3 +47,5 @@ doer? :douser 0= defined? up@ and [IF]
 doer? :dovar 0= [IF]
 | : Create ( "name" -- ) \ core
     DOES> ;
+
+ALL-WORDS
