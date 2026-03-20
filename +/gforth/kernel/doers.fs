@@ -28,7 +28,7 @@ has? compiler 0= [IF]
 \ fillers for interpreter only mode
 \D compileddofillers .( Do-Fillers: )
 
-\ : (does>) ;    
+: (does>) ;    
 
 doer? :dofield 0= [IF] \D compileddofillers .( DOFIELD )
 | : (Field)  DOES> @ + ;
