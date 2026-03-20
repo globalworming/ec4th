@@ -64,7 +64,7 @@ Constant dictionary-end-address
     0< IF [char] - hold THEN ;
 
 : d. ( d -- ) 
-    over -rot dabs <# #s rot sign #> type space ;
+    dup -rot dabs <# #s rot sign #> type space ;
 
 : . ( n -- )
     dup abs s>d <# #s rot sign #> type space ;
