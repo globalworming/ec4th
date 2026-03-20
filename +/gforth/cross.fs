@@ -3830,7 +3830,7 @@ previous
 : 0=   0= ;
 : lshift lshift ;
 : 2/ 2/ ;
-: hex. base @ $10 base ! swap . base ! ;
+: .h base @ $10 base ! swap . base ! ;
 : invert invert ;
 : linkstring ( addr u n addr -- )
     X here over X @ X , swap X ! X , ht-string, X align ;
