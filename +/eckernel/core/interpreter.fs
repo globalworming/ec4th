@@ -296,10 +296,15 @@ require parse-word.fs
 : .elapsed ( u -- ) 
     '~ emit 10 u.x ." ms " ;
 
-: available dictionary-end-address /pad - /hold - here - ;
+\ FIXME move to dictionary / compiler
+: unused ( -- u ) \ core-ext
+\G Return the amount of free space remaining (in address units) in
+\G the region addressed by @code{here}.
+\ https://forth-standard.org/standard/core/UNUSED
+     dictionary-end-address /pad - /hold - here - ;
 
 : .eaten ( u -- ) 
-    ?dup IF '- emit 10 u.x 'b emit available 10 u.x 'b emit space THEN ;
+    ?dup IF '% emit '- emit 10 u.x 'b emit unused 10 u.x 'b emit space THEN ;
 
 : quit-interpret
 \G Decorated interpret when called within quit. Adds timing display.
@@ -329,9 +334,9 @@ require parse-word.fs
     \ exits only through THROW etc.
     BEGIN
         [ defined? state  [IF] ] 
-                    state @ IF ." compiled" cr ELSE ." ok" cr THEN
+                    state @ IF ."  compiled" ELSE ."  ok" THEN cr
         [ [ELSE] ]  \ interpreter only version
-                    ." ok" cr
+                    ."  ok" cr
         [ [THEN] ]
         refill drop 
         quit-interpret
