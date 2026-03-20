@@ -28,39 +28,6 @@ require ./vars.fs
 
 hex
 
-\ labels for some code addresses
-
-\- NIL 0 AConstant NIL \ gforth
-
-\ Aliases
-
-[IFUNDEF] r@
-' i Alias r@ ( -- w ; R: w -- w ) \ core r-fetch
-[THEN]
-
-\ !! this is machine-dependent, but works on all but the strangest machines
-
-: maxaligned ( addr1 -- addr2 ) \ gforth
-    \G @i{addr2} is the first address after @i{addr1} that satisfies
-    \G all alignment restrictions.
-    [ /maxalign 1 - ] Literal + [ 0 /maxalign - ] Literal and ;
-\ !! machine-dependent and won't work if "0 >body" <> "0 >body
-    \G maxaligned"
-' maxaligned Alias cfaligned ( addr1 -- addr2 ) \ gforth
-\G @i{addr2} is the first address after @i{addr1} that is aligned for
-\G a code field (i.e., such that the corresponding body is maxaligned).
-
-: chars ( n1 -- n2 ) \ core
-\G @i{n2} is the number of address units of @i{n1} chars.""
-; immediate
-
-
-\ : A!    ( addr1 addr2 -- ) \ gforth
-\    dup relon ! ;
-\ : A,    ( addr -- ) \ gforth
-\    here cell allot A! ;
-' ! alias A! ( addr1 addr2 -- ) \ gforth
-
 \ UNUSED                                                17may93jaw
 
 has? ec 
@@ -190,14 +157,6 @@ AConstant dictionary-end
 	UNLOOP
     THEN ;
 
-\ s>d um/mod						21mar93py
-
-: s>d ( n -- d ) \ core		s-to-d
-    dup 0< ;
-
-: ud/mod ( ud1 u2 -- urem udquot ) \ gforth
-    >r 0 r@ um/mod r> swap >r
-    um/mod r> ;
 
 \ catch throw                                          23feb93py
 
