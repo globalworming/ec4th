@@ -291,8 +291,16 @@ doer? :dovar [IF]
 doer? :docon [IF]
     : Constant  Header reveal lit :docon cfa, , ;
 [ELSE]
-    : Constant  Create DOES> @ ;
+    : Constant  Create , DOES> @ ;
 [THEN]
+
+\ FIXME: cross.fs compiles doesjump at the start of does> section, remove or keep it for see?
+: :doesjump ;
+: (does>2)
+    2 cells + \ FIXME: skip doesjump: remove it
+    lastcfa @ lit :dodoes over ! cell+ ! ;
+
+\ FIXME: value / defer
 
 \ TODO move to double?
 
@@ -302,7 +310,5 @@ doer? :docon [IF]
     here 2 cells allot 2! ;
 
 : 2Constant ( w1 w2 "name" -- ) \ double two-constant
-    Create ( w1 w2 "name" -- )
-        2,
-    DOES> ( -- w1 w2 )
-        2@ ;
+    Create ( w1 w2 "name" -- ) 2,
+    DOES> 2@ ( -- w1 w2 ) ;
