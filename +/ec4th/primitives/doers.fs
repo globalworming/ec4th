@@ -13,9 +13,10 @@
 
 \ FIXME avoid these fillers
 
-: :doesjump ;
 
 UNDEF-WORDS
+
+: :doesjump ;
 
 : (does>2) true abort" unsupported, compiler missing" ;
 

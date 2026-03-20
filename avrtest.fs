@@ -2,7 +2,7 @@
 
  s" avr.sym" r/w create-file throw value fd-symbol-table
 
-include +/gforth/cross.fs
+include +/ec4th/cross/cross.fs
 
 
 unlock
@@ -44,24 +44,23 @@ include +/ec4th/target/avr/io/emit_key.fs
 \ include +/eckernel/core/stack.fs
 \ include +/eckernel/core/dictionary.fs
 
-include +/eckernel/core/io.fs
+include +/ec4th/kernel/io.fs
 
-include +/eckernel/primitives/minimal.fs
+include +/ec4th/primitives/minimal.fs
 
-include +/eckernel/nio/dothex.fs
-include +/eckernel/debug/dump.fs
+include +/ec4th/nio/dothex.fs
+include +/ec4th/debug/dump.fs
 
-include +/eckernel/core/hashed-search.fs
-include +/eckernel/core/compiler.fs
-include +/eckernel/core/interpreter.fs
-include +/eckernel/core/flow-control.fs
-include +/eckernel/core/numeric-output.fs
-include +/eckernel/core/picture-numeric-output.fs
-include +/eckernel/primitives/doers.fs
+include +/ec4th/kernel/hashed-search.fs
+include +/ec4th/kernel/compiler.fs
+include +/ec4th/kernel/interpreter.fs
+include +/ec4th/kernel/flow-control.fs
+include +/ec4th/kernel/numeric-output.fs
+include +/ec4th/kernel/picture-numeric-output.fs
+include +/ec4th/primitives/doers.fs
 
-include +/eckernel/testing/tester.fs
-include +/eckernel/testing/test-constants.fs
-
+\ include +/ec4th/testing/tester.fs
+\ include +/ec4th/testing/test-constants.fs
 
 \ Codes for testing the Forth-System
 \ include +/gforth/arch/misc/tt.fs
@@ -96,7 +95,7 @@ forth-wordlist !
 
 [THEN]
 
-include +/gforth/ec/mirror.fs
+include +/ec4th/boot/mirror.fs
 
  : boot ( 0|error -- )
   ?dup IF 

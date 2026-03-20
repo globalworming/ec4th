@@ -1,4 +1,4 @@
-\ minimal.fs provide minimal set of primitives (replacements)
+\ minimal.fs provide minimal set of primitives
 
 require comparisons.fs
 require arithmetic.fs
@@ -9,5 +9,5 @@ require string.fs
 \ FIXME: needed?
 include double.fs
 
-\  require definingwords.fs
+\ doers.fs go last
 
