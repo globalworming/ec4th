@@ -1,6 +1,10 @@
- Create mach-file ," +/ec4th/target/avr/mach-common.fs"
+\ builds the image for the Arduino Nano, will be refactored so its
+\ easier to build with different features and for other targets
 
- s" avr.sym" r/w create-file throw value fd-symbol-table
+
+Create mach-file ," +/ec4th/target/avr/mach-common.fs"
+
+s" output/ec4th-arduino-nano.sym" r/w create-file throw value fd-symbol-table
 
 include +/ec4th/cross/cross.fs
 
@@ -41,8 +45,6 @@ include +/ec4th/target/avr/usart-ringbuffer.fs
 \ include +/ec4th/target/avr/io/dot_s.fs
 include +/ec4th/target/avr/io/emit_key.fs
 
-\ include +/eckernel/core/stack.fs
-\ include +/eckernel/core/dictionary.fs
 
 include +/ec4th/kernel/io.fs
 
@@ -120,6 +122,6 @@ include +/ec4th/boot/mirror.fs
 .regions
 fd-symbol-table close-file throw
 
- \ dictionary dump-region
+\ dictionary dump-region
 
- dictionary extent save-region avr.img
+dictionary extent save-region output/ec4th-arduino-nano.bin
