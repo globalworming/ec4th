@@ -1,3 +1,4 @@
+\ double primitive fillers 									19mar26jaw
 
 UNDEF-WORDS
 decimal
@@ -33,6 +34,17 @@ decimal
 
 : dabs ( d -- ud ) \ double d-abs
 	dup 0< IF dnegate THEN ;
+
+: d0< nip 0< ;
+
+: du< ( u1 u2 -- f )
+	2 pick over xor 0< IF 2nip d0< ELSE d- d0< THEN ;
+
+: d0= ( d -- f )
+	or 0= ;
+
+: d= ( d1 d2 -- f ) 
+	rot xor >r xor r> d0= ;
 
 ALL-WORDS
 
