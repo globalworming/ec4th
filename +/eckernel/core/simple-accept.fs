@@ -10,7 +10,9 @@ echo on
 \G If address space is not sufficient emit a bell
   over + over ( start end pnt )
   BEGIN
-   key dup #del = IF drop #bs THEN
+   key
+   dup #del = IF drop #bs THEN
+   dup #tab = IF drop bl THEN
    dup bl u<
    IF   dup #cr = over #lf = or IF space drop nip swap - EXIT THEN
         dup #lf <> \ ignore lf
