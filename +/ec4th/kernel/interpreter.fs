@@ -249,13 +249,19 @@ const Create bases   10 ,   2 ,   A , 100 ,
     THEN ;
 
 : notfound  ( addr u -- )
-    ." ?! " type space
-    -&13 throw ;
+    ." ?! " type space -&13 throw ;
+
+: compile-only ( addr u -- )
+    ." compile only: " type space -&14 throw ;
 
 : interpreter ( c-addr u -- ) 
     2dup find-name
     ?dup IF   
-        nip nip name>xt drop execute
+        name>xt restrict-mask and IF
+            drop compile-only
+        ELSE
+            nip nip execute
+        THEN
     ELSE
         2dup 2>r
         snumber? ( n -1 | d >0)
@@ -289,6 +295,13 @@ require parse-word.fs
                     interpreter
         [ [THEN] ]
     REPEAT 2drop ;  
+
+\ FIXME move to dictionary / compiler
+: unused ( -- u ) \ core-ext
+\G Return the amount of free space remaining (in address units) in
+\G the region addressed by @code{here}.
+\ https://forth-standard.org/standard/core/UNUSED
+     dictionary-end-address /pad - /hold - here - ;
 
 \ Allow quit-interpret to be redefined with other useful things
 [IFUNDEF] quit-interpret

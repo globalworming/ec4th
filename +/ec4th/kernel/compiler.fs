@@ -54,6 +54,7 @@ Variable lastcfa
 \G puts down string as cstring, converting to lowercase the resulting DP may be not aligned
     dup c, bounds DO I c@ lwc c, LOOP ;
 
+\ https://forth-standard.org/standard/core/COMPILEComma
 ' , Alias compile,
 
 \ \ literals							17dec92py
