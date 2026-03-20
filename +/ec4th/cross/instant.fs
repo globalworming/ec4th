@@ -276,10 +276,29 @@ Defer colon-definition-finish ( xt -- )
   r> r> header, set-current here (:noname) ;
 [THEN]
 
+Variable colon-indent
+colon-indent off
+
+: unindent -1 colon-indent +! ;
+
+: .colon-indent
+   colon-indent @ IF
+     cr colon-indent @ dup 2* spaces .
+     >ghostname ?dup IF type ELSE drop ." <UNKNOWN>" THEN
+     ': emit
+     type ': emit .dec
+     1 colon-indent +!
+     r> [ ' unindent >body ] literal >r >r
+   ELSE 2drop 2drop THEN  ;
+
 pa: colon-start 
   last-header-ghost @ >ghostname start-definition
   postpone [ 
-  ['] define-colon-exec2 IS colon-definition-finish 
+  ['] define-colon-exec2 IS colon-definition-finish
+  sourceline# postpone Literal
+  sourcefilename postpone 2Literal
+  lastghost postpone Literal
+  postpone .colon-indent
   ;pa
 
 pa: colon-end 
@@ -569,6 +588,10 @@ X only X definitions
       >r X get-current r> EXECUTE
   THEN ;
 
+\ Variable output-throw
+\ output-throw off
+\ : do-output-throw output-throw @ ABORT" output attempt" ;
+
 >instant-prims
 
 : @ X @ ;
@@ -673,7 +696,7 @@ X only X definitions
 
 
 ' throw ALIAS throw 
-: catch tcfa>icfa catch ;
+: catch colon-indent @ >r tcfa>icfa catch r> colon-indent ! ;
 
 
 \ parsing stuff
