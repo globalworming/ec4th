@@ -4,7 +4,7 @@
 
 Create mach-file ," +/ec4th/target/avr/mach-common.fs"
 
-s" output/ec4th-arduino-nano.sym" r/w create-file throw value fd-symbol-table
+s" output/ec4th-arduino-nano-regular.sym" r/w create-file throw value fd-symbol-table
 
 include +/ec4th/cross/cross.fs
 
@@ -124,4 +124,4 @@ fd-symbol-table close-file throw
 
 \ dictionary dump-region
 
-dictionary extent save-region output/ec4th-arduino-nano.bin
+dictionary extent save-region output/ec4th-arduino-nano-regular.bin

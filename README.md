@@ -1,18 +1,27 @@
 
-## Recommended VC Code Plugins
+## Getting started with ec4th on Arduino Nano
+
+
+
+
+
+
+## Hacking ec4th
+
+Some notes 
+
+### Recommended VC Code Plugins
 
 ext install fttx.language-forth
 Ctags Companion
-
 
     apt-get install simavr binutils-avr
 
 
 Work in progress
 
-bash run.sh
 
-## Using GDB to debug AVR code
+### Using GDB to debug AVR code
 
 Start the simulator with:
 

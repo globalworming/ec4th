@@ -1,15 +1,12 @@
 todo:
-- interpretation semantics of s"
-- interpreter: don't execute compile only word
 - only print millis and unused when not more input is coming?
 - cross compiled 2constant is not working
 - have boot as command / means to reset forth completely
 - fix abort", no flag in standard
 - character parsing, according to standard: 'c'
-- move cross
-- detect when dictionary is full, see pad
+- detect when dictionary is full, reorg dictionary code
 - detect stack overflow and underflow
-- DOES>
+- DOES> in compiler
 - abort" does not take flag, have ?abort", https://forth-standard.org/standard/exception/ABORTq
 - Make no header flag work / use Alias instead of defer
 - speed: check .h / implement lshift / rshift

@@ -5,7 +5,7 @@ set -e
 mkdir -p output
 
 gforth -e "fpath= .|`pwd`" build.fs -e bye 
-t=output/ec4th-arduino-nano
+t=output/ec4th-arduino-nano-regular
 avr-objcopy -I binary -O elf32-avr --change-section-vma .data=0x0000 --rename-section .data=.text $t.bin $t.elf
 avr-objcopy -O ihex -R .eeprom $t.elf $t.hex
 
