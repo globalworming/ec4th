@@ -164,7 +164,15 @@ Variable lastcfa
 
 : ." postpone (.") ," ; immediate restrict
 
-: s" postpone (s") ," ; immediate restrict
+: s" ( compilation "ccc<quote>" -- ; run-time -- c-addr u )  \ core s-quote 
+\G Compiles a string literal and returns it at runtime
+\G The standard does not define interpretation semantics. ec4th returns parses
+\G the string and returns it at interpreation time. The string is directly
+\G from the input buffer and may be overwritten with the next line.
+\G GForth copies the string to a temporary area, however, in EC targets
+\G we will not reserve extra memory for that.
+    state @ IF postpone (s") ,"
+    ELSE [char] " parse THEN ; immediate restrict
 
 : abort" ( compilation 'ccc"' -- ; run-time f -- ) \ core,exception-ext	abort-quote
 \G If any bit of @i{f} is non-zero, perform the function of @code{-2 throw},
