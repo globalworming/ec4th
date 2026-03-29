@@ -8,6 +8,7 @@ echo on
 : accept ( adr len -- len )
 \G Read via key into the given address space until CR is received
 \G If address space is not sufficient emit a bell
+\G https://forth-standard.org/standard/core/ACCEPT
   over + over ( start end pnt )
   BEGIN
    key
