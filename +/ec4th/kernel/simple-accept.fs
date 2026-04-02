@@ -6,7 +6,7 @@ Variable echo
 echo on
 
 : accept ( adr len -- len )
-\G Read via key into the given address space until CR is received
+\G Read via key into the given address space until CR or LF is received
 \G If address space is not sufficient emit a bell
 \G https://forth-standard.org/standard/core/ACCEPT
   over + over ( start end pnt )
@@ -16,6 +16,7 @@ echo on
    dup #tab = IF drop bl THEN
    dup bl u<
    IF   dup #cr = over #lf = or IF space drop nip swap - EXIT THEN
+        \ FIXME: lf handled above, test with pasting
         dup #lf <> \ ignore lf
         IF 
            #bs = IF 3 pick over <> 
