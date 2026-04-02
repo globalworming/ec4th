@@ -23,3 +23,5 @@ decimal
 : ms ( u-millis -- ) \ https://forth-standard.org/standard/facility/MS
 \G Wait until milliseconds passed
   1000 um* dmicros BEGIN 2dup dmicros 2swap d- 5 pick 5 pick d- 0>= nip UNTIL 2drop 2drop ;
+
+include i2c-328.fs
