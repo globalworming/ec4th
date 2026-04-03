@@ -7,6 +7,9 @@ UNDEF-WORDS \ define words only if not defined
 0 Constant false
 [THEN]
 
+' false Alias 0
+\G regardless the base setting we define a word for 0 to optimise
+
 [IFUNDEF] true
 \G Boolean true, defined as -1
 -1 Constant true
