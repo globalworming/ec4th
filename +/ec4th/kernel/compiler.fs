@@ -170,9 +170,8 @@ Variable lastcfa
 \G the string and returns it at interpreation time. The string is directly
 \G from the input buffer and may be overwritten with the next line.
 \G GForth copies the string to a temporary area, however, in EC targets
-\G we will not reserve extra memory for that.
-    state @ IF postpone (s") ,"
-    ELSE [char] " parse THEN ; immediate restrict
+\G we will not reserve extra memory.
+    state @ IF postpone (s") ," ELSE [char] " parse THEN ; immediate
 
 : abort" ( compilation 'ccc"' -- ; run-time f -- ) \ core,exception-ext	abort-quote
 \G If any bit of @i{f} is non-zero, perform the function of @code{-2 throw},
