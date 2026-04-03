@@ -1,4 +1,4 @@
-\ Generic i2c and lcd definitions for Arduino / AVR mega 328
+\ Generic i2c and lcd definitions for Arduino / ATmega328
 
 \ --- TWI register addresses (data space) ---
 $B8 constant TWBR          \ bit rate register
@@ -20,12 +20,20 @@ $04 constant TWEN          \ TWI enable
     \ prescaler = 1
      0 TWSR io! ;
 
+: i2c-init-fast  ( -- )
+\ Initialise TWI at ~400 kHz (assuming 16 MHz clock)
+\ SCL = 16e6 / (16 + 2 * 18 * 1) = 100 kHz
+    \ set bit rate
+    18 TWBR io!             
+    \ prescaler = 1
+     0 TWSR io! ;
+
 : i2c-wait  ( -- )
-\ Wait until TWI operation completes
+\g Wait until TWI operation completes
     begin  TWCR io@ TWINT and  until ;
 
 : i2c-start  ( -- )
-\ Send START condition
+\G Send START condition
     [ TWINT TWSTA or TWEN or ] literal
     TWCR io!
     i2c-wait ;
@@ -39,14 +47,42 @@ $04 constant TWEN          \ TWI enable
 \ Transmit one byte
     TWDR io!
     [ TWINT TWEN or ] literal TWCR io!
+    \ TODO: we should move the wait to the front, so we can get the next byte while i2c is transmiting
     i2c-wait ;
 
-: lcd-i2c!  ( byte i2c-addr -- )
-\ Low-level: send one byte to the PCF8574 
+\ I2C bus probing
+
+| : i2c-status  ( -- status )
+\ Read TWI status (upper 5 bits)
+    TWSR io@ $F8 and ;
+
+| : i2c-ack?  ( 7bit-addr -- flag )
+\ Probe a 7-bit address; return true if ACK
     i2c-start
-    2* i2c-write             \ SLA+W
-    i2c-write                \ data byte
+    2*             \ shift address into bits 7-1, W bit = 0
+    i2c-write
+    i2c-status $18 =      \ $18 = SLA+W ACK received
     i2c-stop ;
+
+: i2c-scan  ( -- )
+\G Init I2C bus and scan I2C bus and print results in grid
+\G Scans 7-bit addresses $08..$77 (skips reserved ranges)
+    i2c-init-fast cr
+    ."     0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F"
+    $80 0 do
+        \ row header every 16 addresses
+        i $0F and 0= if
+            cr i .byte space
+        then
+        i 8 < over $78 > or if
+            \ reserved ranges: print blanks
+            ."  . "
+        else
+            \ print address if device found
+            i i2c-ack? if i .byte else ." -- " then
+        then
+    loop
+    cr ;
 
 \  I2C LCD driver for PCF8574 backpack + HD44780
 \  4-bit mode — assumes i2c-init/start/stop/write from above
@@ -58,6 +94,13 @@ $04 constant TWEN          \ TWI enable
 $01 constant lcd-rs         \ register select (0=cmd, 1=data)
 $04 constant lcd-en         \ enable strobe
 $08 constant lcd-bl         \ backlight
+
+: lcd-i2c!  ( byte i2c-addr -- )
+\ Low-level: send one byte to the PCF8574 
+    i2c-start
+    2* i2c-write             \ SLA+W
+    i2c-write                \ data byte
+    i2c-stop ;
 
 : lcd-strobe  ( nibble-byte i2c-addr -- )
 \ Pulse enable while keeping other signals
