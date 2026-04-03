@@ -22,6 +22,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build CI container
         run: docker compose -f docker-compose.yml build
@@ -74,7 +75,6 @@ jobs:
       - name: Publish wordset report summary
         run: |
           {
-            echo "# Forth 2012 Wordset Coverage"
             echo
             cat release-artifacts/forth2012-core-wordset-coverage.md
           } >> "$GITHUB_STEP_SUMMARY"
@@ -94,6 +94,8 @@ jobs:
         env:
           TAG_NAME: ${{ steps.version.outputs.tag }}
         run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
           git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
           git push origin "$TAG_NAME"
 
@@ -111,4 +113,7 @@ jobs:
 
       - name: Clean up
         if: ${{ always() }}
-        run: docker compose -f docker-compose.yml down --volumes --remove-orphans >/dev/null 2>&1 || true
+        run: |
+          docker compose -f docker-compose.yml down --volumes --remove-orphans >/dev/null 2>&1 || true
+          git reset --hard HEAD
+          git clean -fdx
