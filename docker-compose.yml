@@ -1,0 +1,8 @@
+services:
+  workspace:
+    build:
+      context: .
+      dockerfile: ci/Dockerfile
+    image: ec4th-ci
+    working_dir: /workspace
+    command: ["sleep", "infinity"]
