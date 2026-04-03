@@ -57,7 +57,7 @@ DECIMAL
   false (.h) space ;
 
 : .byte ( n -- )
-\G Prints a hex byte in fixed to digit format with a trailing space.
+\G Prints a hex byte in fixed two digit format with a trailing space.
   dup 4 rshift .hdigit .hdigit space ;
 
 : .$ ( n -- ) 

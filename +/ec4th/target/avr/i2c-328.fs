@@ -13,16 +13,17 @@ $10 constant TWSTO         \ stop condition
 $04 constant TWEN          \ TWI enable
 
 : i2c-init  ( -- )
-\ Initialise TWI at ~100 kHz (assuming 16 MHz clock)
-\ SCL = 16e6 / (16 + 2 * 72 * 1) = 100 kHz
+\ Initialise TWI at ~100kHz (assuming 16MHz clock)
+\ SCL = 16e6 / (16 + 2 * 72 * 1) = 100kHz
     \ set bit rate
     72 TWBR io!             
     \ prescaler = 1
      0 TWSR io! ;
 
 : i2c-init-fast  ( -- )
-\ Initialise TWI at ~400 kHz (assuming 16 MHz clock)
-\ SCL = 16e6 / (16 + 2 * 18 * 1) = 100 kHz
+\ Initialise TWI at ~400kHz (assuming 16MHz clock)
+\ SCL = 16e6 / (16 + 2 * 18 * 1) = 400kHz
+\ TODO: the higher speed does not gain much at the moment, maybe remove
     \ set bit rate
     18 TWBR io!             
     \ prescaler = 1
@@ -34,21 +35,16 @@ $04 constant TWEN          \ TWI enable
 
 : i2c-start  ( -- )
 \G Send START condition
-    [ TWINT TWSTA or TWEN or ] literal
-    TWCR io!
-    i2c-wait ;
+    [ TWINT TWSTA or TWEN or ] literal TWCR io! ;
 
 : i2c-stop  ( -- )
 \ Send STOP condition
-    \ no wait needed; HW clears TWSTO when done
+    i2c-wait
     [ TWINT TWSTO or TWEN or ] literal TWCR io! ;
 
 : i2c-write  ( byte -- )
 \ Transmit one byte
-    TWDR io!
-    [ TWINT TWEN or ] literal TWCR io!
-    \ TODO: we should move the wait to the front, so we can get the next byte while i2c is transmiting
-    i2c-wait ;
+    i2c-wait TWDR io! [ TWINT TWEN or ] literal TWCR io! ;
 
 \ I2C bus probing
 
@@ -61,11 +57,12 @@ $04 constant TWEN          \ TWI enable
     i2c-start
     2*             \ shift address into bits 7-1, W bit = 0
     i2c-write
+    i2c-wait
     i2c-status $18 =      \ $18 = SLA+W ACK received
     i2c-stop ;
 
 : i2c-scan  ( -- )
-\G Init I2C bus and scan I2C bus and print results in grid
+\G Init I2C bus with 100khz and scan I2C bus and print results in grid
 \G Scans 7-bit addresses $08..$77 (skips reserved ranges)
     i2c-init-fast cr
     ."     0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F"
@@ -158,4 +155,5 @@ const create lcd-rows  $00 c, $40 c, $14 c, $54 c,
 
 : lcd-number ( n i2c-addr -- )
 \ Print a number to the lcd
+\ TODO: maybe remove
     >r s>d <# #s #> r> lcd-type ;
