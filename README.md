@@ -64,6 +64,18 @@ And start the debugger with:
 
 The `display/i $pc` will print the instruction for every step.
 
+# running wokwi scenarios
 
+<https://docs.wokwi.com/wokwi-ci/cli-installation>
+
+```bash
+make all
+# see https://wokwi.com/dashboard/ci
+WOKWI_CLI_TOKEN=wok_JFXXXX.. \ 
+wokwi-cli \
+    --scenario wokwi-scenario/smoke.test.yaml \
+    --timeout 500 \
+    --serial-log-file "output/test/smoke.serial.log" 
+ ```
 
 
