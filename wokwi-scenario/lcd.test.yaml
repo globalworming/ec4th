@@ -1,4 +1,4 @@
-name: First Test
+name: LCD
 version: 1
 author: wormi
 
@@ -12,6 +12,6 @@ steps:
   - wait-serial: 'ok'
   - take-screenshot:
       part-id: 'lcd1'
-      save-to: '../output/test/first.test.1.png'
-      compare-with: './first.test.1.png'
+      save-to: '../output/test/lcd.1.png'
+      compare-with: './lcd.1.png'
   
