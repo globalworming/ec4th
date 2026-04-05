@@ -5,10 +5,10 @@ author: wormi
 steps:
   - wait-serial: 'ec4th ok'
   - delay: 5ms
-  - write-serial: ".S \r"
+  - write-serial: " .S \r"
   - wait-serial: '<0>'
   - wait-serial: 'ok'
-  - write-serial: "$27 lcd-init s\" Hola Mundo\" $27 lcd-type \r"
+  - write-serial: " $27 lcd-init s\" Hola Mundo\" $27 lcd-type \r"
   - wait-serial: 'ok'
   - take-screenshot:
       part-id: 'lcd1'

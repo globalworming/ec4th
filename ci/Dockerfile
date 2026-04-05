@@ -8,7 +8,13 @@ RUN apt-get update \
         make \
         simavr \
         binutils-avr \
+        wget \
+        ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+
+RUN wget -q -O /usr/local/bin/wokwi-cli \
+      https://github.com/wokwi/wokwi-cli/releases/latest/download/wokwi-cli-linuxstatic-x64 \
+    && chmod +x /usr/local/bin/wokwi-cli
 
 WORKDIR /workspace
 
