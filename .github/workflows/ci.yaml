@@ -1,0 +1,138 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build CI container
+        run: |
+          docker compose -f docker-compose.yml build
+
+      - name: Prepare
+        run: |
+          set -euo pipefail
+          mkdir -p release-artifacts
+          docker compose -f docker-compose.yml up -d
+
+      - name: Build
+        run: |
+          docker compose -f docker-compose.yml exec -T \
+            workspace bash -lc 'cd /workspace && bash build.sh'
+
+      - name: Generate report
+        run: |
+          docker compose -f docker-compose.yml exec -T \
+            workspace bash -lc 'cd /workspace && make forth2012-report'
+
+      - name: Smoke test
+        run: |
+          docker compose -f docker-compose.yml exec -T \
+            workspace bash -lc 'cd /workspace && bash ci/smoke-test.sh'
+
+      - name: Collect release artifacts
+        run: |
+          container_id="$(docker compose -f docker-compose.yml ps -q workspace)"
+          docker cp \
+            "$container_id:/workspace/output/ec4th-arduino-nano-regular.bin" \
+            release-artifacts/
+          docker cp \
+            "$container_id:/workspace/output/ec4th-arduino-nano-regular.elf" \
+            release-artifacts/
+          docker cp \
+            "$container_id:/workspace/output/ec4th-arduino-nano-regular.hex" \
+            release-artifacts/
+          docker cp \
+            "$container_id:/workspace/output/ec4th-arduino-nano-regular.sym" \
+            release-artifacts/
+          docker cp \
+            "$container_id:/workspace/doc/forth2012-core-wordset-coverage.md" \
+            release-artifacts/
+
+      - name: Compute next patch tag
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          latest_tag="$(git tag --list 'v*' --sort=-version:refname | head -n1)"
+
+          if [[ -z "$latest_tag" ]]; then
+            next_tag="v0.0.1"
+          elif [[ "$latest_tag" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            major="${BASH_REMATCH[1]}"
+            minor="${BASH_REMATCH[2]}"
+            patch="${BASH_REMATCH[3]}"
+            next_tag="v${major}.${minor}.$((patch + 1))"
+          else
+            echo "Latest tag '$latest_tag' is not semver vX.Y.Z" >&2
+            exit 1
+          fi
+
+          echo "tag=$next_tag" >>"$GITHUB_OUTPUT"
+
+      - name: Publish wordset report summary
+        run: |
+          {
+            echo
+            cat release-artifacts/forth2012-core-wordset-coverage.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ec4th-build-${{ github.sha }}
+          path: |
+            release-artifacts/ec4th-arduino-nano-regular.bin
+            release-artifacts/ec4th-arduino-nano-regular.elf
+            release-artifacts/ec4th-arduino-nano-regular.hex
+            release-artifacts/ec4th-arduino-nano-regular.sym
+            release-artifacts/forth2012-core-wordset-coverage.md
+
+      - name: Create and push release tag
+        env:
+          TAG_NAME: ${{ steps.version.outputs.tag }}
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email \
+            "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+          git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
+          git push origin "$TAG_NAME"
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Release ${{ steps.version.outputs.tag }}
+          files: |
+            release-artifacts/ec4th-arduino-nano-regular.bin
+            release-artifacts/ec4th-arduino-nano-regular.elf
+            release-artifacts/ec4th-arduino-nano-regular.hex
+            release-artifacts/ec4th-arduino-nano-regular.sym
+            release-artifacts/forth2012-core-wordset-coverage.md
+
+      - name: Clean up
+        if: ${{ always() }}
+        run: |
+          docker compose -f docker-compose.yml down \
+            --volumes --remove-orphans >/dev/null 2>&1 || true
+          git reset --hard HEAD
+          git clean -fdx

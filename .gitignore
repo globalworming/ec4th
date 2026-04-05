@@ -3,3 +3,4 @@ tags
 doc/crossdoc.fd
 output
 .env
+doc/forth2012-core-wordset-coverage.md
