@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build-release:
+  build-artifacts:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,66 +25,19 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build CI container
-        run: |
-          docker compose -f docker-compose.yml build
+        run: docker compose -f docker-compose.yml build
 
-      - name: Prepare
-        run: |
-          set -euo pipefail
-          mkdir -p release-artifacts
-          docker compose -f docker-compose.yml up -d
+      - name: Start workspace
+        run: docker compose -f docker-compose.yml up -d
 
-      - name: Build
+      - name: Build artifacts
         run: |
           docker compose -f docker-compose.yml exec -T \
-            workspace bash -lc 'cd /workspace && bash build.sh'
+            workspace bash -lc 'cd /workspace && bash build.sh && make forth2012-report'
 
-      - name: Generate report
-        run: |
-          docker compose -f docker-compose.yml exec -T \
-            workspace bash -lc 'cd /workspace && make forth2012-report'
-
-      - name: Smoke test
-        run: |
-          docker compose -f docker-compose.yml exec -T \
-            workspace bash -lc 'cd /workspace && bash ci/smoke-test.sh'
-      
-      - name: wokwi tests
-        run: |
-          docker compose -f docker-compose.yml exec -T \
-            -e WOKWI_CLI_TOKEN="${{ secrets.WOKWI_CLI_TOKEN }}" \
-            workspace bash -lc 'cd /workspace && \
-              mkdir -p output/test && \
-              wokwi-cli -q \
-                --scenario wokwi-scenario/first.test.yaml \
-                --timeout 1000 \
-                --serial-log-file output/test/first.test.log'
-
-      - name: Collect test artifacts
-        if: ${{ always() }}
-        run: |
-          mkdir -p output
-          rm -rf output/test
-          container_id="$(docker compose -f docker-compose.yml ps -q workspace)"
-          docker cp \
-            "$container_id:/workspace/output/test" \
-            output/test
-          {
-            echo
-            find output/test -type f -name '*.log' -print -exec cat {} \;
-            echo
-          } >> "$GITHUB_STEP_SUMMARY"
-          
-
-      - name: Upload test artifacts
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ec4th-test-${{ github.sha }}
-          path: output/test
-      
       - name: Collect release artifacts
         run: |
+          mkdir -p release-artifacts
           container_id="$(docker compose -f docker-compose.yml ps -q workspace)"
           docker cp \
             "$container_id:/workspace/output/ec4th-arduino-nano-regular.bin" \
@@ -101,6 +54,128 @@ jobs:
           docker cp \
             "$container_id:/workspace/doc/forth2012-core-wordset-coverage.md" \
             release-artifacts/
+
+      - name: Publish wordset report summary
+        run: |
+          {
+            echo
+            cat release-artifacts/forth2012-core-wordset-coverage.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Stage release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ec4th-build-${{ github.sha }}
+          path: |
+            release-artifacts/ec4th-arduino-nano-regular.bin
+            release-artifacts/ec4th-arduino-nano-regular.elf
+            release-artifacts/ec4th-arduino-nano-regular.hex
+            release-artifacts/ec4th-arduino-nano-regular.sym
+            release-artifacts/forth2012-core-wordset-coverage.md
+
+      - name: Clean up
+        if: ${{ always() }}
+        run: docker compose -f docker-compose.yml down --volumes --remove-orphans
+
+  simavr-smoke:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build CI container
+        run: docker compose -f docker-compose.yml build
+
+      - name: Start workspace
+        run: docker compose -f docker-compose.yml up -d
+
+      - name: Build firmware for smoke test
+        run: |
+          docker compose -f docker-compose.yml exec -T \
+            workspace bash -lc 'cd /workspace && bash build.sh'
+
+      - name: Run simavr smoke test
+        run: |
+          docker compose -f docker-compose.yml exec -T \
+            workspace bash -lc 'cd /workspace && bash ci/smoke-test.sh'
+
+      - name: Clean up
+        if: ${{ always() }}
+        run: docker compose -f docker-compose.yml down --volumes --remove-orphans
+
+  wokwi-scenario:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build CI container
+        run: docker compose -f docker-compose.yml build
+
+      - name: Start workspace
+        run: docker compose -f docker-compose.yml up -d
+
+      - name: Build firmware for Wokwi
+        run: |
+          docker compose -f docker-compose.yml exec -T \
+            workspace bash -lc 'cd /workspace && bash build.sh'
+
+      - name: Run Wokwi scenario test
+        run: |
+          docker compose -f docker-compose.yml exec -T \
+            -e WOKWI_CLI_TOKEN="${{ secrets.WOKWI_CLI_TOKEN }}" \
+            workspace bash -lc 'cd /workspace && make wokwi-tests'
+
+      - name: Collect test artifacts
+        if: ${{ always() }}
+        run: |
+          mkdir -p output
+          container_id="$(docker compose -f docker-compose.yml ps -q workspace)"
+          rm -rf output/test
+          docker cp \
+            "$container_id:/workspace/output/test" \
+            output/test || true
+          {
+            echo
+            if [[ -d output/test ]]; then
+              find output/test -type f -name '*.log' -print -exec cat {} \;
+            fi
+            echo
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload test artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ec4th-test-${{ github.sha }}
+          path: output/test
+          if-no-files-found: ignore
+
+      - name: Clean up
+        if: ${{ always() }}
+        run: docker compose -f docker-compose.yml down --volumes --remove-orphans
+
+  release:
+    runs-on: ubuntu-latest
+    needs:
+      - build-artifacts
+      - simavr-smoke
+      - wokwi-scenario
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ec4th-build-${{ github.sha }}
+          path: release-artifacts
 
       - name: Compute next patch tag
         id: version
@@ -123,24 +198,6 @@ jobs:
 
           echo "tag=$next_tag" >>"$GITHUB_OUTPUT"
 
-      - name: Publish wordset report summary
-        run: |
-          {
-            echo
-            cat release-artifacts/forth2012-core-wordset-coverage.md
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ec4th-build-${{ github.sha }}
-          path: |
-            release-artifacts/ec4th-arduino-nano-regular.bin
-            release-artifacts/ec4th-arduino-nano-regular.elf
-            release-artifacts/ec4th-arduino-nano-regular.hex
-            release-artifacts/ec4th-arduino-nano-regular.sym
-            release-artifacts/forth2012-core-wordset-coverage.md
-
       - name: Create and push release tag
         env:
           TAG_NAME: ${{ steps.version.outputs.tag }}
@@ -162,11 +219,3 @@ jobs:
             release-artifacts/ec4th-arduino-nano-regular.hex
             release-artifacts/ec4th-arduino-nano-regular.sym
             release-artifacts/forth2012-core-wordset-coverage.md
-
-      - name: Clean up
-        if: ${{ always() }}
-        run: |
-          docker compose -f docker-compose.yml down \
-            --volumes --remove-orphans >/dev/null 2>&1 || true
-          git reset --hard HEAD
-          git clean -fdx
