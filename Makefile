@@ -11,3 +11,11 @@ forth2012-report:
 
 clean:
 	rm -rf output
+
+wokwi-tests:
+	mkdir -p output/test
+	set -a; . ./.env; set +a; \
+		wokwi-cli \
+			--scenario wokwi-scenario/first.test.yaml \
+			--timeout 1000 \
+			--serial-log-file output/test/wokwi.serial.log
