@@ -12,6 +12,5 @@ steps:
   - wait-serial: 'ok'
   - take-screenshot:
       part-id: 'lcd1'
-      save-to: '../output/test/lcd.1.png'
+      save-to: '../../output/test/lcd.1.png'
       compare-with: './lcd.1.png'
-  

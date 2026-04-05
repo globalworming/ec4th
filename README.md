@@ -73,9 +73,9 @@ make all
 # see https://wokwi.com/dashboard/ci
 WOKWI_CLI_TOKEN=wok_JFXXXX.. \ 
 wokwi-cli \
-    --scenario wokwi-scenario/smoke.test.yaml \
+    --scenario wokwi-scenario/smoke/smoke.test.yaml \
+    --diagram-file wokwi-scenario/smoke/diagram.json \
     --timeout 500 \
     --serial-log-file "output/test/smoke.serial.log" 
  ```
-
 

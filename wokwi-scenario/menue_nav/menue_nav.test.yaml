@@ -5,4 +5,3 @@ author: wormi
 steps:
   - wait-serial: 'ec4th ok'
   - delay: 5ms
-  

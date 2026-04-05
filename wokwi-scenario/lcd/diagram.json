@@ -14,9 +14,9 @@
       "id": "lcd1",
       "top": 50,
       "left": 180,
-      "attrs": { 
-        "pins": "i2c", 
-        "i2cAddress": "0x27" 
+      "attrs": {
+        "pins": "i2c",
+        "i2cAddress": "0x27"
       }
     }
   ],
