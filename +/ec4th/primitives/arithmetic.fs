@@ -4,18 +4,21 @@ UNDEF-WORDS
 
 decimal
 
+: - ( n1 n2 -- n3 )
+  negate + ;
+
 \ adds one to the TOS
-: 1+ ( S: n1--n2 ; R: -- )
+: 1+ ( n1 -- n2)
 	1 + ;
 
 \ substracts one from the TOS
-: 1- ( S: n1--n2 ; R: -- )
+: 1- ( n1 -- n2 )
 	1 - ;
 
-: 2+ ( S: n1--n2 ; R: -- )
+: 2+ (  n1 -- n2 )
 \G Add 2 to TOS. Non standard word but embedded 16 bit systems
 \G can be expected to have this since its the same as cell+
-\G this should be implemented as primitive, aliased to cell+
+\G its best to be implemented as primitive and will be aliased to cell+
 	2 + ;
 
 : 2* ( n1 - n2 ) \ core
