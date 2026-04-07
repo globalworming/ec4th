@@ -6,14 +6,15 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$SCRIPT_DIR/.."
 mkdir -p output/test
 
+WOKWI_CLI="${WOKWI_CLI:-wokwi-cli}"
 pids=()
 
 while IFS= read -r scenario; do
   scenario_dir="$(dirname "$scenario")"
   scenario_name="$(basename "$scenario_dir")"
   diagram="$scenario_dir/diagram.json"
-
-  wokwi-cli \
+  
+  "$WOKWI_CLI" \
     --scenario "$scenario" \
     --diagram-file "$diagram" \
     --timeout 500 \

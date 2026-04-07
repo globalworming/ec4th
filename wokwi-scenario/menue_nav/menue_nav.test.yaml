@@ -1,7 +1,0 @@
-name: Menue Nav
-version: 1
-author: wormi
-
-steps:
-  - wait-serial: 'ec4th ok'
-  - delay: 5ms
