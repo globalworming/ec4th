@@ -1,7 +1,6 @@
 \ Initialise USART0 to 115k at 16MHz clock for Arduino 10mar26jaw
 
-\ This is straight line code to be included at the right place
-\ during the device startup sequence
+\ This is straight line code to be included in the device startup sequence
 
 \ https://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf#page=149
 

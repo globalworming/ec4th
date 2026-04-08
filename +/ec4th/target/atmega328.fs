@@ -13,10 +13,12 @@ Label error-ip		0 ,
 Label init-ramend return-stack-init addr>data ,
 Label init-dataStack data-stack-init addr>data ,
 
+Label init-system
+    here jmp-reset jmp!
+end-label+
 
 include avr/usart-init.fs
 include avr/timer0-ticks.fs
 include avr/prim.fs
 include avr/muldiv.fs
 include avr/arduino-library.fs
-

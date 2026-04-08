@@ -1,5 +1,11 @@
 \ USART ring buffer implementation for Arduino / AVR        13mar26jaw
 
+\ When the Forth system is interpreting or compiling, subsequent 
+\ input will get lost in case there is only one character buffer.
+\ This receives serial input in an interrupt service routine (ISR) and collects
+\ it in a ring buffer. The ISR interprets a Ctrl-C and also an detects an
+\ overflow. In this case it restarts the Forth interpreter with an error code.
+
 decimal
 
 start-macros
