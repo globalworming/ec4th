@@ -25,34 +25,34 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build CI container
-        run: docker compose -f docker-compose.yml build
+        run: docker compose build
 
       - name: Start workspace
-        run: docker compose -f docker-compose.yml up -d
+        run: docker compose up -d
 
       - name: Build artifacts
         run: |
-          docker compose -f docker-compose.yml exec -T \
+          docker compose exec -T \
             workspace bash -lc 'cd /workspace && bash build.sh && make forth2012-report'
 
       - name: Collect release artifacts
         run: |
           mkdir -p release-artifacts
-          container_id="$(docker compose -f docker-compose.yml ps -q workspace)"
+
           docker cp \
-            "$container_id:/workspace/output/ec4th-arduino-nano-regular.bin" \
+            "workspace:/workspace/output/ec4th-arduino-nano-regular.bin" \
             release-artifacts/
           docker cp \
-            "$container_id:/workspace/output/ec4th-arduino-nano-regular.elf" \
+            "workspace:/workspace/output/ec4th-arduino-nano-regular.elf" \
             release-artifacts/
           docker cp \
-            "$container_id:/workspace/output/ec4th-arduino-nano-regular.hex" \
+            "workspace:/workspace/output/ec4th-arduino-nano-regular.hex" \
             release-artifacts/
           docker cp \
-            "$container_id:/workspace/output/ec4th-arduino-nano-regular.sym" \
+            "workspace:/workspace/output/ec4th-arduino-nano-regular.sym" \
             release-artifacts/
           docker cp \
-            "$container_id:/workspace/doc/forth2012-core-wordset-coverage.md" \
+            "workspace:/workspace/doc/forth2012-core-wordset-coverage.md" \
             release-artifacts/
 
       - name: Publish wordset report summary
@@ -75,7 +75,7 @@ jobs:
 
       - name: Clean up
         if: ${{ always() }}
-        run: docker compose -f docker-compose.yml down --volumes --remove-orphans
+        run: docker compose down --volumes --remove-orphans
 
   simavr-smoke:
     runs-on: ubuntu-latest
@@ -85,24 +85,24 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build CI container
-        run: docker compose -f docker-compose.yml build
+        run: docker compose build
 
       - name: Start workspace
-        run: docker compose -f docker-compose.yml up -d
+        run: docker compose up -d
 
       - name: Build firmware for smoke test
         run: |
-          docker compose -f docker-compose.yml exec -T \
+          docker compose exec -T \
             workspace bash -lc 'cd /workspace && bash build.sh'
 
       - name: Run simavr smoke test
         run: |
-          docker compose -f docker-compose.yml exec -T \
+          docker compose exec -T \
             workspace bash -lc 'cd /workspace && bash ci/smoke-test.sh'
 
       - name: Clean up
         if: ${{ always() }}
-        run: docker compose -f docker-compose.yml down --volumes --remove-orphans
+        run: docker compose down --volumes --remove-orphans
 
   wokwi-scenario:
     runs-on: ubuntu-latest
@@ -112,19 +112,19 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build CI container
-        run: docker compose -f docker-compose.yml build
+        run: docker compose build
 
       - name: Start workspace
-        run: docker compose -f docker-compose.yml up -d
+        run: docker compose up -d
 
       - name: Build firmware for Wokwi
         run: |
-          docker compose -f docker-compose.yml exec -T \
+          docker compose exec -T \
             workspace bash -lc 'cd /workspace && bash build.sh'
 
       - name: Run Wokwi scenario test
         run: |
-          docker compose -f docker-compose.yml exec -T \
+          docker compose exec -T \
             -e WOKWI_CLI_TOKEN="${{ secrets.WOKWI_CLI_TOKEN }}" \
             workspace bash -lc 'cd /workspace && make wokwi-tests'
 
@@ -132,10 +132,10 @@ jobs:
         if: ${{ always() }}
         run: |
           mkdir -p output
-          container_id="$(docker compose -f docker-compose.yml ps -q workspace)"
+          container_id="$(docker compose ps -q workspace)"
           rm -rf output/test
           docker cp \
-            "$container_id:/workspace/output/test" \
+            "workspace:/workspace/output/test" \
             output/test || true
           {
             echo
@@ -156,7 +156,7 @@ jobs:
 
       - name: Clean up
         if: ${{ always() }}
-        run: docker compose -f docker-compose.yml down --volumes --remove-orphans
+        run: docker compose down --volumes --remove-orphans
 
   release:
     runs-on: ubuntu-latest
