@@ -1,5 +1,6 @@
 services:
   workspace:
+    container_name: workspace
     build:
       context: .
       dockerfile: ci/Dockerfile

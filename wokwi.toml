@@ -1,4 +1,3 @@
 [wokwi]
 version = 1
 firmware = 'output/ec4th-arduino-nano-regular.hex'
-elf = 'output/ec4th-arduino-nano-regular.elf'

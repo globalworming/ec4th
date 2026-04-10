@@ -6,7 +6,7 @@ log_file="$(mktemp)"
 trap 'rm -f "$log_file"' EXIT
 
 set +e
-stdbuf -oL -eL timeout 5 simavr -m atmega328p -f 16000000 output/ec4th-arduino-nano-regular.elf \
+stdbuf -oL -eL timeout 5 simavr -m atmega328p -f 16000000 output/*.hex \
   >"$log_file" 2>&1
 status=$?
 set -e
