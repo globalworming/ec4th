@@ -58,14 +58,13 @@ Label on-error
 
 Label do_next
 	'| pout
-\ jumps to IP + 2 (next word to execute)
-	ZL IPL movw, \ read IP to Z
-	IPL 2 adiw,
-	?rom-address-cp, 
+	?rom-address-xh-cp, 
 	0 $ brcs,
-	WL ldZ+, WH ldZ+,
+	WL ldx+, WH ldx+, \ X is IP, advance and fetch next instruction from RAM
 	1 $ rjmp,
 0 $:
+	zl xl movw,
+	IPL 2 adiw,
 	zh-mask-rom-address,     \ Remove high bit marking the rom address
 	WL lpmZ+, WH lpmZ+,
 Label do_next2

@@ -169,6 +169,18 @@ ram-start $1ff and $100 <> [IF]
     ZH mempivot cp,
   THEN ;
 
+: ?rom-address-xh-cp,
+\ carry is set if it is rom / program memory
+  \ cp: rd rr c = rr > rd
+  rom-start IF
+    mempivot XH cp,
+  ELSE
+    XH mempivot cp,
+  THEN ;
+
+
+
+
 : addr>pm ( addr -- addr )
 \ translate the dictionary address to device pm address
 \ when its not starting at 0
