@@ -1,3 +1,5 @@
+\ f83search hand optimised f83search for AVR  18mar26jaw
+
 Decimal
 
 | Code f83search ( c-addr n lfa -- nfa|0 )

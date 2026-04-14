@@ -146,6 +146,7 @@ ram-start $1ff and $100 <> [IF]
   rom-start IF ZH $7f andi, THEN ;
 
 : tosh-pm-forth,
+\ convert tosh pm address to forth address
   rom-start IF tosh rom-start 8 rshift ori, THEN ;
 
 : mempivot-init,
@@ -167,6 +168,18 @@ ram-start $1ff and $100 <> [IF]
   ELSE
     ZH mempivot cp,
   THEN ;
+
+: ?rom-address-xh-cp,
+\ carry is set if it is rom / program memory
+  \ cp: rd rr c = rr > rd
+  rom-start IF
+    mempivot XH cp,
+  ELSE
+    XH mempivot cp,
+  THEN ;
+
+
+
 
 : addr>pm ( addr -- addr )
 \ translate the dictionary address to device pm address

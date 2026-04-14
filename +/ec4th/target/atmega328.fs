@@ -22,3 +22,5 @@ include avr/timer0-ticks.fs
 include avr/prim.fs
 include avr/muldiv.fs
 include avr/arduino-library.fs
+include avr/f83search.fs
+include avr/parse-word.fs
