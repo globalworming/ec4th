@@ -146,6 +146,7 @@ ram-start $1ff and $100 <> [IF]
   rom-start IF ZH $7f andi, THEN ;
 
 : tosh-pm-forth,
+\ convert tosh pm address to forth address
   rom-start IF tosh rom-start 8 rshift ori, THEN ;
 
 : mempivot-init,

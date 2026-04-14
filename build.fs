@@ -44,7 +44,6 @@ setup-target
 lock
 
 include +/ec4th/target/atmega328.fs
-include +/ec4th/target/avr/f83search.fs
 
 include +/ec4th/target/avr/io/uart.fs
 include +/ec4th/target/avr/usart-ringbuffer.fs
