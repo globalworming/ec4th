@@ -1,6 +1,0 @@
-name: Smoke
-version: 1
-author: wormi
-
-steps:
-  - wait-serial: 'ec4th ok'  

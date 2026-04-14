@@ -11,6 +11,3 @@ forth2012-report:
 
 clean:
 	rm -rf output
-
-wokwi-tests:
-	if [ -f ./.env ]; then set -a; . ./.env; set +a; fi; ./bin/wokwi-tests.sh
