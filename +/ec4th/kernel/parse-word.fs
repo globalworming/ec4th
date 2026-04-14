@@ -43,6 +43,12 @@ The compiler also defines scan and parse.
 
   [THEN]
 
+0 [IF]
+
+\ working straight forward version, however, its more efficient
+\ to have a single word combining skip-white and parse-white that
+\ can be implemented as primitive
+
 : (skip-white) ( c-addr2 c-addr1 -- c-addr2 c-addr3 )
 \ skip until end (addr2 is reached) or as long whitespace as
 \ (tab, space, newline, here: everything below 33)
@@ -66,3 +72,23 @@ The compiler also defines scan and parse.
   nip dup source drop - char+ source nip umin >in !
   ( S start end-addr ) 
   over - ;
+
+[THEN]
+
+: (parse-word) ( c-addr u -- word-addr word-len )
+  \ skip whitespace
+  BEGIN dup WHILE over c@ bl <= WHILE 1 /string REPEAT THEN
+  \ save word start
+  over >r
+  \ scan non-whitespace
+  begin dup WHILE over c@ bl > WHILE 1 /string REPEAT THEN
+  \ calculate result
+  drop r> tuck - ;
+
+: parse-word ( -- c-addr len )
+\ Skip whitespace characters and return the next word from
+\ the input buffer delimited by whitespace. The input buffer
+\ pointer is advanced and skips one delemiting whitespace character. But only one.
+  source >in @ /string
+  (parse-word)
+  2dup + source drop - char+ source nip umin >in ! ;
