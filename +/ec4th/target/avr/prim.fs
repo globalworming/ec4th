@@ -195,30 +195,26 @@ label skip_next
 	do_next rjmp,
 end-code+
 
-\ FIXME do loop
-code (loop)-xxx
-	temp0 pop, temp1 pop, \ index
+code (loop)
+	\ TODO: (loop) maybe optimse more?
+	zl pop, zh pop, \ index
 	temp4 pop, temp5 pop, \ limit
-	temp2 1 ldi, temp3 clr,
-	temp0 temp2 add,
-	temp1 temp3 adc,
+	zl 1 adiw,
 	temp5 push, temp4 push,
-	temp1 push, temp0 push,
-	temp0 temp4 cp,
-	temp1 temp5 cpc,
+	zh push, zl push,
+	zl temp4 cp,
+	zh temp5 cpc,
 	branch brcs,
 	skip_next rjmp,
 end-code+
 
-\ FIXME do loop
-code unloop-xxx
-	temp0 pop, temp1 pop,
-	temp4 pop, temp5 pop,
+code unloop
+	temp0 pop, temp0 pop,
+	temp0 pop, temp0 pop,
 	do_next rjmp,
 end-code+
 
-\ FIXME do loop
-code (do)-xxx
+code (do)
 	temp0 tosl movw, \ index
 	loadtos
 	tosh push, tosl push, \ limit
@@ -454,11 +450,11 @@ Code 0< ( n1 -- n2 )
 End-Code+
 
 Code u< ( u1 u2 -- f )
-\ FIXME: jump instead?
 	temp2 clr,
 	loadtemp
 	temp0 tosl cp,
 	temp1 tosh cpc,
+	\ fill tos from carry, should be 1 cycle faster then jump
 	temp2 zero sbc,
 	tosl temp2 mov,
 	tosh temp2 mov,
@@ -486,10 +482,13 @@ End-Code+
 Code r@ ( S: -- n ; R: n -- n )
 	\ duplicates one item from return stack to TOS
 	\ Same as I for DO ... LOOP
-	\ FIXME better use ldx?
 	savetos
-	tosl pop, tosh pop,
-	tosh push, tosl push,
+	zl SPL in/lds,
+	zh SPH in/lds,
+	tosl 1 lddz, tosh 2 lddz,
+\ alternative, just pop and push, above should be faster
+\	tosl pop, tosh pop,
+\	tosh push, tosl push,
 	do_next rjmp,
 End-Code+
 
