@@ -1,4 +1,4 @@
-.PHONY: all clean forth2012-report wokwi-tests
+.PHONY: all clean forth2012-report
 
 SYM ?= output/ec4th-arduino-nano-regular.sym
 OUT ?= doc/forth2012-core-wordset-coverage.md
@@ -11,6 +11,3 @@ forth2012-report:
 
 clean:
 	rm -rf output
-
-wokwi-tests:
-	if [ -f ./.env ]; then set -a; . ./.env; set +a; fi; ./bin/wokwi-tests.sh
